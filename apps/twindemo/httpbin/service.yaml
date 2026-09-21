@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: default
+  labels:
+    app: httpbin
+  annotations:
+    resource.twingate.com/type: "WebApp"
+    resource.twingate.com/gatewayName: "twop-gateway"
+    resource.twingate.com/gatewayNamespace: "twingate"
+    resource.twingate.com/alias: "app.int"
+    resource.twingate.com/downstreamPort: "80"
+spec:
+  selector:
+    app: httpbin
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      protocol: TCP

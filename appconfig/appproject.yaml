@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: octolet
+  namespace: argocd
+spec:
+  description: Octolet Pi cluster — observability, networking, platform apps
+  sourceRepos:
+    - https://github.com/graybern/octolet
+    - https://prometheus-community.github.io/helm-charts
+    - https://grafana.github.io/helm-charts
+    - https://charts.external-secrets.io
+    - ghcr.io/twingate/helmcharts/*
+  destinations:
+    - namespace: "*"
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

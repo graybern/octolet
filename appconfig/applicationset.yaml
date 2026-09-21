@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: octolet-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/graybern/octolet
+        revision: HEAD
+        directories:
+          - path: apps/*/*
+  template:
+    metadata:
+      name: "{{ .path.basename }}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/managed-by: applicationset
+        octolet/category: "{{ index .path.segments 1 }}"
+    spec:
+      project: octolet
+      source:
+        repoURL: https://github.com/graybern/octolet
+        targetRevision: HEAD
+        path: "{{ .path.path }}"
+        directory:
+          recurse: true
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .path.basename }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

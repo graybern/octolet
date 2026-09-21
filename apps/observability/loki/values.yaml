@@ -1,0 +1,68 @@
+deploymentMode: SingleBinary
+
+loki:
+  auth_enabled: false
+  schemaConfig:
+    configs:
+      - from: "2024-01-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+  storage:
+    type: filesystem
+  limits_config:
+    retention_period: 336h
+    ingestion_rate_mb: 8
+    ingestion_burst_size_mb: 16
+  commonConfig:
+    replication_factor: 1
+  compactor:
+    retention_enabled: true
+
+singleBinary:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 20Gi
+
+gateway:
+  enabled: false
+
+chunksCache:
+  enabled: false
+
+resultsCache:
+  enabled: false
+
+backend:
+  replicas: 0
+
+read:
+  replicas: 0
+
+write:
+  replicas: 0
+
+monitoring:
+  serviceMonitor:
+    enabled: true
+  selfMonitoring:
+    enabled: false
+    grafanaAgent:
+      installOperator: false
+  lokiCanary:
+    enabled: false
+
+test:
+  enabled: false

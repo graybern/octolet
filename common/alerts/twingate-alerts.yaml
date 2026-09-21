@@ -1,0 +1,43 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: twingate-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+    - name: twingate.rules
+      rules:
+        - alert: TwingateConnectorDown
+          expr: |
+            count(kube_pod_status_phase{namespace="twingate", phase="Running"} * on(pod) kube_pod_labels{label_app_kubernetes_io_name="twingate-connector"}) < 2
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Fewer than 2 Twingate Connectors running"
+            description: "Expected 2 connectors in the twingate namespace but only {{ $value }} are running."
+
+        - alert: TwingateOperatorDown
+          expr: |
+            absent(kube_pod_status_phase{namespace="twingate", phase="Running"} * on(pod) kube_pod_labels{label_app_kubernetes_io_name="twingate-operator"})
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Twingate Operator is not running"
+            description: "No Twingate Operator pod found in the twingate namespace."
+
+    - name: twingate.recording-rules
+      rules:
+        - record: twingate:gateway_http_error_rate:5m
+          expr: |
+            sum(rate(twingate_gateway_http_requests_total{code=~"5.."}[5m]))
+            / sum(rate(twingate_gateway_http_requests_total[5m]))
+
+        - record: twingate:gateway_request_rate:5m
+          expr: sum(rate(twingate_gateway_http_requests_total[5m]))
+
+        - record: twingate:gateway_active_connections
+          expr: sum(twingate_gateway_active_tcp_connections)
