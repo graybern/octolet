@@ -1,0 +1,50 @@
+tempo:
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+      wal:
+        path: /var/tempo/wal
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+        http:
+          endpoint: "0.0.0.0:4318"
+    jaeger:
+      protocols:
+        thrift_http:
+          endpoint: "0.0.0.0:14268"
+
+  metricsGenerator:
+    enabled: true
+    remoteWriteUrl: "http://prometheus-stack-kube-prom-prometheus.monitoring:9090/api/v1/write"
+    processor:
+      service_graphs:
+        dimensions: []
+      span_metrics:
+        dimensions: []
+
+  retention: 168h
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+persistence:
+  enabled: true
+  storageClassName: local-path
+  size: 10Gi
+
+serviceMonitor:
+  enabled: true
+
+service:
+  type: ClusterIP

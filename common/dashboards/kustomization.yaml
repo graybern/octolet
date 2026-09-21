@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# Dashboard JSON files will be added here as ConfigMaps in Phase 2.
+# The Grafana sidecar auto-imports ConfigMaps with label grafana_dashboard=1.
+resources: []

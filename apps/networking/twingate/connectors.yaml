@@ -1,0 +1,27 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateConnector
+metadata:
+  name: twop-connector-1
+  namespace: twingate
+spec:
+  name: prem-tejon-octolet-twop-1
+  logAnalytics: true
+  logLevel: 3
+  hasStatusNotificationsEnabled: true
+  image:
+    repository: twingate/connector
+    tag: latest
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateConnector
+metadata:
+  name: twop-connector-2
+  namespace: twingate
+spec:
+  name: prem-tejon-octolet-twop-2
+  logAnalytics: true
+  logLevel: 3
+  hasStatusNotificationsEnabled: true
+  image:
+    repository: twingate/connector
+    tag: latest

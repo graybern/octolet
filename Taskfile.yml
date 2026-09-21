@@ -1,0 +1,90 @@
+version: "3"
+
+vars:
+  REPO_URL: https://github.com/graybern/octolet
+  CLUSTER_CONTEXT: default
+
+tasks:
+  bootstrap:
+    desc: Apply ArgoCD appconfig to the cluster (one-time setup)
+    cmds:
+      - kubectl apply -f appconfig/appproject.yaml
+      - kubectl apply -f appconfig/applicationset.yaml
+    preconditions:
+      - sh: kubectl cluster-info
+        msg: "Cannot reach cluster. Check your kubeconfig."
+
+  validate:
+    desc: Validate all YAML files
+    cmds:
+      - |
+        find . -name '*.yaml' -o -name '*.yml' | while read f; do
+          echo "Validating $f..."
+          kubectl apply --dry-run=client -f "$f" 2>/dev/null || echo "  (skipped: not a K8s resource)"
+        done
+
+  lint:
+    desc: Lint YAML files with yamllint (if installed)
+    cmds:
+      - yamllint -d relaxed .
+    preconditions:
+      - sh: command -v yamllint
+        msg: "yamllint not installed. Run: pip install yamllint"
+
+  diff:
+    desc: Show what ArgoCD would change (requires argocd CLI)
+    cmds:
+      - |
+        for app in $(kubectl get applications -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+          echo "=== $app ==="
+          argocd app diff "$app" --local . 2>/dev/null || echo "  (no diff or app not found)"
+        done
+
+  sync:
+    desc: Force sync all ArgoCD applications
+    cmds:
+      - |
+        for app in $(kubectl get applications -n argocd -o jsonpath='{.items[*].metadata.name}'); do
+          echo "Syncing $app..."
+          argocd app sync "$app"
+        done
+
+  status:
+    desc: Show status of all ArgoCD applications
+    cmds:
+      - kubectl get applications -n argocd -o wide
+
+  secrets:create-twingate:
+    desc: Create the Twingate Operator API key secret (interactive)
+    cmds:
+      - |
+        echo "Enter the Twingate API key:"
+        read -s API_KEY
+        kubectl create namespace twingate --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic twingate-operator-api-key \
+          --namespace twingate \
+          --from-literal=TWINGATE_API_KEY="$API_KEY" \
+          --dry-run=client -o yaml | kubectl apply -f -
+        echo "Secret created in namespace twingate."
+
+  secrets:create-grafana:
+    desc: Create the Grafana admin credentials secret (interactive)
+    cmds:
+      - |
+        echo "Enter Grafana admin username:"
+        read ADMIN_USER
+        echo "Enter Grafana admin password:"
+        read -s ADMIN_PASS
+        kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic grafana-admin \
+          --namespace monitoring \
+          --from-literal=admin-user="$ADMIN_USER" \
+          --from-literal=admin-password="$ADMIN_PASS" \
+          --dry-run=client -o yaml | kubectl apply -f -
+        echo "Secret created in namespace monitoring."
+
+  secrets:create-all:
+    desc: Create all required secrets (interactive)
+    cmds:
+      - task: secrets:create-twingate
+      - task: secrets:create-grafana

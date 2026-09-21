@@ -1,0 +1,125 @@
+alloy:
+  configMap:
+    content: |
+      // =============================================================
+      // Pod log discovery and collection → Loki
+      // =============================================================
+
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+
+        // Drop pods that aren't running
+        rule {
+          source_labels = ["__meta_kubernetes_pod_phase"]
+          regex         = "Pending|Succeeded|Failed|Completed"
+          action        = "drop"
+        }
+
+        // Build the log file path from pod metadata
+        rule {
+          source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+          target_label  = "__path__"
+          separator     = "/"
+          replacement   = "/var/log/pods/*$1/$2/*.log"
+        }
+
+        // Standard Kubernetes labels
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_node_name"]
+          target_label  = "node"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "app"
+        }
+      }
+
+      loki.source.file "pod_logs" {
+        targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki.monitoring:3100/loki/api/v1/push"
+        }
+      }
+
+      // =============================================================
+      // OTLP trace receiver → Tempo
+      // =============================================================
+
+      otelcol.receiver.otlp "default" {
+        grpc {
+          endpoint = "0.0.0.0:4317"
+        }
+        http {
+          endpoint = "0.0.0.0:4318"
+        }
+        output {
+          traces = [otelcol.exporter.otlp.tempo.input]
+        }
+      }
+
+      otelcol.exporter.otlp "tempo" {
+        client {
+          endpoint = "tempo.monitoring:4317"
+          tls {
+            insecure = true
+          }
+        }
+      }
+
+      // =============================================================
+      // Self-metrics → Prometheus
+      // =============================================================
+
+      prometheus.scrape "alloy_self" {
+        targets = [{
+          __address__ = "localhost:12345",
+        }]
+        scrape_interval = "60s"
+        forward_to      = [prometheus.remote_write.default.receiver]
+      }
+
+      prometheus.remote_write "default" {
+        endpoint {
+          url = "http://prometheus-stack-kube-prom-prometheus.monitoring:9090/api/v1/write"
+        }
+      }
+
+  mounts:
+    varlog: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+controller:
+  type: daemonset
+  tolerations:
+    - operator: Exists
+      effect: NoSchedule
+
+serviceMonitor:
+  enabled: true

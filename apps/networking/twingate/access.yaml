@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: twop-resource-access-gateway
+  namespace: twingate
+spec:
+  resourceRef:
+    name: twop-gateway-resource
+    namespace: twingate
+  principalExternalRef:
+    type: group
+    name: Admins

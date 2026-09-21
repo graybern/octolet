@@ -1,0 +1,60 @@
+twingateOperator:
+  existingSecretName: twingate-operator-api-key
+  network: "gbernard"
+  host: "twingate.com"
+  remoteNetworkId: "UmVtb3RlTmV0d29yazozMjE1OTU="
+  logFormat: "json"
+  defaultResourceTags:
+    managed-by: twingate-operator
+    environment: octolet
+
+image:
+  repository: twingate/kubernetes-operator
+  pullPolicy: IfNotPresent
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+gateway:
+  enabled: true
+  twingate:
+    network: "gbernard"
+    host: "twingate.com"
+  twingateOperator:
+    gateway:
+      enabled: true
+    kubernetesResource:
+      enabled: true
+      name: "k8s-prem-tejon-octolet"
+      alias: "api-k8s.octolet.int"
+  kubernetes:
+    enabled: true
+  ssh:
+    enabled: true
+    gateway:
+      username: "ubuntu"
+    ca:
+      manual:
+        privateKey: "" # Stored in K8s Secret — do NOT commit
+  webApp:
+    enabled: true
+  tls:
+    dnsNames:
+      - "app.int"
+  metrics:
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+    grafanaDashboard:
+      enabled: true
+      labels:
+        grafana_dashboard: "1"
+    prometheusRule:
+      enabled: true

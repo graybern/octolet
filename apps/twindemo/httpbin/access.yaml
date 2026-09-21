@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: httpbin-resource-access
+  namespace: default
+spec:
+  resourceRef:
+    name: httpbin-resource
+    namespace: default
+  principalExternalRef:
+    type: group
+    name: Admins

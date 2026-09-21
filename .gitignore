@@ -1,0 +1,27 @@
+# Helm
+charts/*/charts/
+*.tgz
+Chart.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Secrets (never commit)
+*.key
+*.pem
+secrets/
+.env
+.env.*
+
+# Terraform (if used later)
+.terraform/
+*.tfstate
+*.tfstate.*
