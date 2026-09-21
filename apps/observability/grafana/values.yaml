@@ -13,6 +13,14 @@ admin:
   userKey: admin-user
   passwordKey: admin-password
 
+env:
+  GF_AUTH_JWT_ENABLED: "true"
+  GF_AUTH_JWT_HEADER_NAME: "X-JWT-Assertion"
+  GF_AUTH_JWT_JWK_SET_URL: "https://gbernard.twingate.com/api/v1/jwk/ec"
+  GF_AUTH_JWT_USERNAME_CLAIM: "email"
+  GF_AUTH_JWT_AUTO_SIGN_UP: "true"
+  GF_AUTH_JWT_ROLE_ATTRIBUTE_PATH: "contains(groups[*], 'Admins') && 'Admin' || 'Viewer'"
+
 grafana.ini:
   server:
     root_url: https://grafana.octolet.int

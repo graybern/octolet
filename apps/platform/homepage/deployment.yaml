@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: admin
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          env:
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: "homepage.octolet.int"
+          volumeMounts:
+            - name: homepage-config
+              mountPath: /app/config
+            - name: logs
+              mountPath: /app/config/logs
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: homepage-config
+          configMap:
+            name: homepage-config
+        - name: logs
+          emptyDir: {}

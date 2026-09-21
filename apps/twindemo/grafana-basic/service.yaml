@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-basic
+  namespace: default
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Demo · Grafana (Basic Auth)"
+    resource.twingate.com/alias: "grafana-basic.octolet.int"
+spec:
+  type: ExternalName
+  externalName: grafana.monitoring.svc.cluster.local

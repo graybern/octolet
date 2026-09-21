@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sshd
+  namespace: default
+  labels:
+    app: sshd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sshd
+  template:
+    metadata:
+      labels:
+        app: sshd
+    spec:
+      containers:
+        - name: sshd
+          image: ubuntu:24.04
+          command: ["bash", "/scripts/setup.sh"]
+          ports:
+            - containerPort: 2222
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: ca-key
+              mountPath: /etc/ssh/ca_key
+              subPath: ssh-privatekey
+              readOnly: true
+            - name: scripts
+              mountPath: /scripts/setup.sh
+              subPath: setup.sh
+            - name: scripts
+              mountPath: /scripts/sshd_config
+              subPath: sshd_config
+      volumes:
+        - name: ca-key
+          secret:
+            secretName: twingate-ssh-ca
+            defaultMode: 0400
+        - name: scripts
+          configMap:
+            name: sshd-config

@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sshd-config
+  namespace: default
+data:
+  sshd_config: |
+    Port 2222
+    PermitRootLogin no
+    PasswordAuthentication yes
+    PubkeyAuthentication yes
+    TrustedUserCAKeys /etc/ssh/twingate_ca.pub
+    HostKey /etc/ssh/ssh_host_ed25519_key
+    HostKey /etc/ssh/ssh_host_rsa_key
+  setup.sh: |
+    #!/bin/bash
+    set -e
+    apt-get update && apt-get install -y openssh-server
+    mkdir -p /run/sshd /etc/ssh
+    ssh-keygen -y -f /etc/ssh/ca_key > /etc/ssh/twingate_ca.pub
+    cp /scripts/sshd_config /etc/ssh/sshd_config_custom
+    if ! id ubuntu &>/dev/null; then
+      useradd -m -s /bin/bash ubuntu
+      echo "ubuntu:octolet" | chpasswd
+    fi
+    ssh-keygen -A
+    exec /usr/sbin/sshd -D -e -f /etc/ssh/sshd_config_custom

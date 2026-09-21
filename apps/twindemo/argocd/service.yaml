@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-proxy
+  namespace: default
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/type: "WebApp"
+    resource.twingate.com/name: "Infra · ArgoCD"
+    resource.twingate.com/gatewayName: "twop-gateway"
+    resource.twingate.com/gatewayNamespace: "twingate"
+    resource.twingate.com/alias: "argocd-gw.octolet.int"
+    resource.twingate.com/downstreamPort: "443"
+spec:
+  type: ExternalName
+  externalName: argocd-server.argocd.svc.cluster.local

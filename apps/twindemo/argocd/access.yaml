@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: argocd-access
+  namespace: default
+spec:
+  resourceRef:
+    name: argocd-proxy-resource
+    namespace: default
+  principalExternalRef:
+    type: group
+    name: Admins
