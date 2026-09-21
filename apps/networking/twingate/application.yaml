@@ -8,7 +8,7 @@ spec:
   sources:
     - repoURL: ghcr.io/twingate/helmcharts
       chart: twingate-operator
-      targetRevision: "0.1.13"
+      targetRevision: "2.0.2"
       helm:
         releaseName: twop
         valueFiles:
