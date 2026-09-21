@@ -21,6 +21,7 @@ loki:
     replication_factor: 1
   compactor:
     retention_enabled: true
+    delete_request_store: filesystem
 
 singleBinary:
   replicas: 1
