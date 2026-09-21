@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: sshd-access
+  namespace: default
+spec:
+  resourceRef:
+    name: sshd-resource
+    namespace: default
+  principalExternalRef:
+    type: group
+    name: Admins

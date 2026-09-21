@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: admin
+  labels:
+    app: homepage
+data:
+  settings.yaml: |
+    title: Octolet Dashboard
+    theme: dark
+    color: slate
+    headerStyle: boxedWidgets
+    useEqualHeights: true
+    disableCollapse: false
+    showStats: true
+    target: _blank
+    layout:
+      Observability:
+        style: row
+        columns: 3
+      Twingate:
+        style: row
+        columns: 3
+      Demo Apps:
+        style: row
+        columns: 4
+      Cluster:
+        style: row
+        columns: 2
+
+  kubernetes.yaml: |
+    mode: cluster
+
+  widgets.yaml: |
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+          label: "octolet"
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    - greeting:
+        text_size: xl
+        text: "Octolet Pi Cluster"
+    - datetime:
+        text_size: xl
+        format:
+          dateStyle: long
+          timeStyle: short
+
+  services.yaml: |
+    - Observability:
+        - Grafana:
+            icon: grafana.svg
+            href: https://grafana.octolet.int
+            description: Dashboards & visualization
+            siteMonitor: http://grafana.monitoring:80
+        - Prometheus:
+            icon: prometheus.svg
+            href: https://prometheus.octolet.int
+            description: Metrics & alerting
+            siteMonitor: http://prometheus-stack-kube-prom-prometheus.monitoring:9090
+        - AlertManager:
+            icon: alertmanager.svg
+            href: https://alertmanager.octolet.int
+            description: Alert routing
+            siteMonitor: http://alertmanager-operated.monitoring:9093
+
+    - Twingate:
+        - ArgoCD:
+            icon: argocd.svg
+            href: https://argocd.octolet.int
+            description: GitOps delivery
+            siteMonitor: http://argocd-server.argocd:80
+        - Twingate Gateway:
+            icon: twingate.svg
+            description: K8s API + SSH + WebApp proxy
+            siteMonitor: http://twop-gateway.twingate:9090/metrics
+        - Twingate Connectors:
+            icon: twingate.svg
+            description: 2x connectors (prem-tejon-octolet)
+
+    - Demo Apps:
+        - httpbin (JWT):
+            icon: mdi-api
+            href: https://app.int
+            description: WebApp with JWT auth
+        - SSH Server:
+            icon: mdi-console
+            description: SSH via Twingate Gateway
+        - Grafana JWT:
+            icon: grafana.svg
+            href: https://grafana-jwt.octolet.int
+            description: Grafana with SSO via JWT
+        - Grafana Basic:
+            icon: grafana.svg
+            href: https://grafana-basic.octolet.int
+            description: Grafana with password auth
+
+    - Cluster:
+        - Nodes:
+            widget:
+              type: kubernetes
+              cluster:
+                show: true
+                cpu: true
+                memory: true
+        - Storage:
+            widget:
+              type: kubernetes
+              nodes:
+                show: true
+
+  bookmarks.yaml: |
+    - Links:
+        - GitHub Repo:
+            - icon: github.svg
+              href: https://github.com/graybern/octolet
+        - Twingate Admin:
+            - icon: twingate.svg
+              href: https://gbernard.twingate.com
+        - ArgoCD:
+            - icon: argocd.svg
+              href: https://argocd.octolet.int

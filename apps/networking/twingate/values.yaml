@@ -42,12 +42,16 @@ gateway:
       username: "ubuntu"
     ca:
       manual:
-        privateKey: "" # Stored in K8s Secret — do NOT commit
+        existingSecret: "twingate-ssh-ca"
   webApp:
     enabled: true
   tls:
     dnsNames:
       - "app.int"
+      - "grafana-jwt.octolet.int"
+      - "ssh.octolet.int"
+      - "argocd-gw.octolet.int"
+      - "*.default.svc.cluster.local"
   metrics:
     serviceMonitor:
       enabled: true

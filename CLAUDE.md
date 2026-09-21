@@ -22,13 +22,27 @@
 | Traces | Tempo | Monolithic | `grafana/tempo` |
 | Collection | Grafana Alloy | DaemonSet (single-tier) | `grafana/alloy` |
 
-### Why These Choices
+## Key Decisions
 
-- **Alloy over raw OTel Collector**: Alloy IS an OpenTelemetry distribution with native Grafana integration, Prometheus scraping, Loki log shipping, and Pyroscope profiling built in. Single binary replaces Promtail + OTel Collector + Grafana Agent.
-- **Monolithic Loki/Tempo**: SimpleScalable is deprecated in Loki 4.0. Monolithic is recommended for clusters <50 nodes. Same rationale for Tempo.
-- **Standalone Grafana**: Decoupled from kube-prometheus-stack for independent version pinning and upgrade path. The kps Grafana subchart consistently lags behind.
-- **node-exporter + Alloy (both DaemonSets)**: Kept separate for failure isolation. node-exporter provides host metrics; Alloy collects logs + traces. If Alloy OOMs, metrics keep flowing. Alloy CAN replace node-exporter via `prometheus.exporter.unix` — tracked in TODO.md.
-- **Single-tier Alloy**: 5 nodes don't need a gateway tier. DaemonSet agents push directly to backends.
+1. **Alloy over raw OTel Collector.** **Why:** Alloy IS an OpenTelemetry distribution with native Grafana integration, Prometheus scraping, Loki log shipping, and Pyroscope profiling built in. Single binary replaces Promtail + OTel Collector + Grafana Agent. **Trade-off:** Vendor lock-in to Grafana ecosystem; standard OTel Collector would be more portable.
+
+2. **Monolithic Loki/Tempo.** **Why:** SimpleScalable is deprecated in Loki 4.0. Monolithic is recommended for clusters <50 nodes. Same rationale for Tempo. **Trade-off:** Can't scale read/write paths independently; sufficient for 5-node cluster.
+
+3. **Standalone Grafana (not bundled in kube-prometheus-stack).** **Why:** Independent version pinning and upgrade path. The kps Grafana subchart consistently lags months behind standalone. JWT auth config is cleaner on standalone. **Trade-off:** One more ArgoCD Application to manage.
+
+4. **Both node-exporter + Alloy DaemonSets.** **Why:** Failure isolation — node-exporter provides host metrics, Alloy collects logs + traces. If Alloy OOMs, metrics keep flowing. **Trade-off:** Two DaemonSets per node (~138MB vs ~150MB if consolidated). Consolidation tracked in TODO.md.
+
+5. **Single-tier Alloy (no gateway tier).** **Why:** 5 nodes don't need centralized processing. DaemonSet agents push directly to backends. **Trade-off:** No tail-based trace sampling or cross-node aggregation; add gateway tier later if needed.
+
+6. **App-of-apps with ApplicationSet.** **Why:** Auto-discovers apps from `apps/*/*` directory structure. Adding a new app = creating a directory. **Trade-off:** Inner Application names must differ from parent names (we use `-stack` suffix).
+
+7. **Manual K8s Secrets (ESO planned for Phase 2).** **Why:** Simplest to start. No Vault or ESO dependency. **Trade-off:** Secrets aren't in git; must be created manually on each cluster rebuild.
+
+8. **local-path storage (Longhorn planned for Phase 2).** **Why:** K3s default, zero setup. **Trade-off:** No replication — a node failure loses that node's PVC data.
+
+9. **JWT auth on production Grafana (not separate demo instance).** **Why:** Avoids running two Grafana instances on Pi hardware. Password auth kept as fallback for direct Traefik access. **Trade-off:** JWT config is in the production Grafana values.
+
+10. **ArgoCD behind Gateway with anonymous read-only.** **Why:** ArgoCD doesn't support header-based JWT auth like Grafana. Anonymous read-only + Gateway access control gives passwordless viewing. **Trade-off:** No user identity in ArgoCD audit logs; write operations require CLI.
 
 ### Data Flow
 
@@ -57,6 +71,28 @@ Grafana datasources (cross-linked):
 - **Gateway**: 28 Prometheus metrics on port 9090 (HTTP, TCP, K8s API, Auth, Sessions). Built-in ServiceMonitor, Grafana dashboard, and PrometheusRules — enabled in values.
 - **Connectors**: No native metrics endpoint. Structured L4 connection logs via `logAnalytics: true` → collected by Alloy → query with LogQL in Grafana. Log-derived metrics via `rate()`/`count_over_time()`.
 - **Operator**: Kopf-based Python operator. Set `logFormat: "json"` for structured logs.
+
+## Label Taxonomy
+
+| Label | Values | Purpose |
+|-------|--------|---------|
+| `octolet/layer` | `observability`, `networking`, `platform`, `twindemo`, `hardware` | App category (maps to `apps/` subdirectories) |
+| `octolet/component` | `prometheus`, `loki`, `grafana`, `twingate`, `httpbin`, `sshd`, `homepage`, etc. | Specific component |
+| `managed-by` | `argocd`, `helm`, `manual` | How the resource is deployed |
+| `project` | `octolet` | Always `octolet` — for cost allocation and filtering |
+
+## Naming Conventions
+
+| Thing | Pattern | Example |
+|-------|---------|---------|
+| Helm releases | `<component>-stack` | `prometheus-stack`, `loki-stack`, `alloy-stack` |
+| ArgoCD inner apps | `<component>-stack` | Avoids collision with parent app names from ApplicationSet |
+| Ingress hostnames | `<component>.octolet.int` | `grafana.octolet.int`, `prometheus.octolet.int` |
+| Twingate aliases | `<service>.octolet.int` or `<service>.int` | `grafana-jwt.octolet.int`, `app.int`, `ssh.octolet.int` |
+| K8s Secrets | `<component>-<purpose>` | `twingate-operator-api-key`, `grafana-admin`, `twingate-ssh-ca` |
+| Twingate resources | `"<Category> · <Name>"` | `"Demo · Grafana (JWT)"`, `"Demo · SSH Server"`, `"Infra · ArgoCD"` |
+| Connectors | `prem-tejon-octolet-twop-<n>` | `prem-tejon-octolet-twop-1` |
+| Namespaces | By function | `monitoring`, `twingate`, `default` (demos), `admin` (homepage), `argocd` |
 
 ## Repo Conventions
 
@@ -113,6 +149,7 @@ Manual Kubernetes Secrets for now. External Secrets Operator planned for Phase 2
 Current manual secrets:
 - `twingate-operator-api-key` in namespace `twingate` — Twingate API key
 - `grafana-admin` in namespace `monitoring` — Grafana admin username and password (keys: `admin-user`, `admin-password`)
+- `twingate-ssh-ca` in namespace `twingate` — SSH CA key pair for Gateway cert signing (keys: `ssh-privatekey`, `ssh-publickey`)
 
 ### Pi Constraints
 
@@ -124,10 +161,22 @@ Current manual secrets:
 
 ### Ingress
 
-Traefik with `*.octolet.int` internal DNS:
-- `grafana.octolet.int`
-- `prometheus.octolet.int`
-- `alertmanager.octolet.int`
+**Traefik ingress** (`*.octolet.int`, direct HTTP access):
+- `grafana.octolet.int` — Grafana (password or JWT auth)
+- `prometheus.octolet.int` — Prometheus
+- `alertmanager.octolet.int` — AlertManager
+- `homepage.octolet.int` — Homepage dashboard
+- `argocd.octolet.int` — ArgoCD (password login)
+
+**Twingate Gateway** (`*.octolet.int` / `*.int`, L7 proxy with JWT/SSH):
+- `grafana-jwt.octolet.int` — Grafana (auto-login via JWT)
+- `argocd-gw.octolet.int` — ArgoCD (anonymous read-only)
+- `app.int` — httpbin (WebApp with JWT)
+- `ssh.octolet.int` — sshd (SSH cert auth)
+- `api-k8s.octolet.int` — K8s API (kubectl via Gateway)
+
+**Twingate Connectors** (L4 tunnel, Network-type resources):
+- `grafana-basic.octolet.int` — Grafana (password auth via tunnel)
 
 Loki and Tempo are accessed in-cluster only (via Grafana datasources and Alloy). No external ingress needed.
 
@@ -159,4 +208,5 @@ task validate                # Dry-run validate all YAML
 task secrets:create-all      # Create all required secrets (interactive)
 task secrets:create-twingate # Create Twingate API key secret
 task secrets:create-grafana  # Create Grafana admin credentials
+task secrets:create-ssh-ca   # Generate SSH CA key pair for Gateway
 ```

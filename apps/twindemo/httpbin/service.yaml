@@ -7,6 +7,7 @@ metadata:
     app: httpbin
   annotations:
     resource.twingate.com/type: "WebApp"
+    resource.twingate.com/name: "Demo · Web App (JWT)"
     resource.twingate.com/gatewayName: "twop-gateway"
     resource.twingate.com/gatewayNamespace: "twingate"
     resource.twingate.com/alias: "app.int"
