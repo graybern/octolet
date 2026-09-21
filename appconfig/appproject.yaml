@@ -10,6 +10,7 @@ spec:
     - https://prometheus-community.github.io/helm-charts
     - https://grafana.github.io/helm-charts
     - https://charts.external-secrets.io
+    - ghcr.io/twingate/helmcharts
     - ghcr.io/twingate/helmcharts/*
   destinations:
     - namespace: "*"
