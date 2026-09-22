@@ -63,3 +63,30 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
     - Pulsing red: critical alerts or node NotReady
     - Rainbow/chase: cluster-wide event (deploy in progress)
   - Custom container: Python + `blinkstick` library + Prometheus client
+
+## Networking
+
+- [ ] **Envoy Gateway (Gateway API)** — `apps/networking/envoy-gateway/`
+  - K8s is moving from Ingress to Gateway API — Envoy Gateway is the reference implementation
+  - Install as a separate `GatewayClass` alongside existing Traefik Ingress (completely isolated)
+  - Traefik continues handling all `*.octolet.int` Ingress resources
+  - New test services use `HTTPRoute` resources pointing to the Envoy `GatewayClass`
+  - Both run side-by-side — no risk to existing setup
+  - Chart: `oci://docker.io/envoyproxy/gateway-helm`
+  - Alternative: enable Gateway API on existing Traefik v3 (less isolation, no new controller)
+  - Deploy in `envoy-gateway-system` namespace
+
+- [ ] **ArgoCD OIDC SSO** — Configure ArgoCD Dex with IdP (Google/Okta)
+  - Full auto-login with user identity (not anonymous read-only)
+  - Requires `argocd-cm` ConfigMap + Dex connector configuration
+  - ArgoCD not yet managed by this repo — would need to be added or configured manually
+
+## Reliability
+
+- [ ] **Health probes audit** — Add startup/readiness/liveness probes to all custom deployments
+  - Helm charts (Prometheus, Grafana, Loki, Tempo, Alloy) already have probes built in
+  - Custom manifests need probes added:
+    - `apps/twindemo/sshd/deployment.yaml` — exec probe: `ssh-keygen -l -f /etc/ssh/twingate_ca.pub`
+    - `apps/platform/homepage/deployment.yaml` — HTTP probe: GET `:3000/api/healthcheck`
+  - Document probe convention in CLAUDE.md: all custom deployments must include at least readiness + liveness
+  - Consider startup probes for slow-starting containers (sshd installs packages at startup)
