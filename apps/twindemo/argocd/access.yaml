@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   resourceRef:
-    name: argocd-proxy-resource
+    name: argocd-resource
     namespace: default
   principalExternalRef:
     type: group

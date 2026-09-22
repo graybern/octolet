@@ -1,7 +1,8 @@
 twingateOperator:
-  existingSecretName: twingate-operator-api-key
+  existingAPIKeySecret:
+    name: twingate-operator-api-key
+    key: TWINGATE_API_KEY
   network: "gbernard"
-  host: "twingate.com"
   remoteNetworkId: "UmVtb3RlTmV0d29yazozMjE1OTU="
   logFormat: "json"
   defaultResourceTags:
@@ -26,7 +27,6 @@ gateway:
   enabled: true
   twingate:
     network: "gbernard"
-    host: "twingate.com"
   twingateOperator:
     gateway:
       enabled: true
