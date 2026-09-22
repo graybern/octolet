@@ -1,0 +1,17 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResource
+metadata:
+  name: argocd-resource
+  namespace: default
+spec:
+  type: WebApp
+  name: "Infra · ArgoCD"
+  address: argocd-server.argocd.svc.cluster.local
+  alias: "argocd-gw.octolet.int"
+  gatewayRef:
+    name: twop-gateway
+    namespace: twingate
+  downstream:
+    port: 443
+  upstream:
+    port: 443
