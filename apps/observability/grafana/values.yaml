@@ -32,6 +32,12 @@ grafana.ini:
 ingress:
   enabled: true
   ingressClassName: traefik
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Grafana"
+    gethomepage.dev/group: "Observability"
+    gethomepage.dev/icon: "grafana.svg"
+    gethomepage.dev/description: "Dashboards (JWT auto-login via Twingate)"
   hosts:
     - grafana.octolet.int
 

@@ -21,7 +21,7 @@ data:
         columns: 3
       Infrastructure:
         style: row
-        columns: 4
+        columns: 3
       Twingate Demo:
         style: row
         columns: 4
@@ -55,34 +55,12 @@ data:
           timeStyle: short
 
   services.yaml: |
-    - Observability:
-        - Grafana:
-            icon: grafana.svg
-            href: http://grafana.octolet.int
-            description: Dashboards (JWT auto-login via Twingate)
-            siteMonitor: http://grafana.monitoring:80
-        - Prometheus:
-            icon: prometheus.svg
-            href: http://prometheus.octolet.int
-            description: Metrics & alerting
-            siteMonitor: http://prometheus-stack-kube-prom-prometheus.monitoring:9090
-        - AlertManager:
-            icon: alertmanager.svg
-            href: http://alertmanager.octolet.int
-            description: Alert routing
-            siteMonitor: http://alertmanager-operated.monitoring:9093
-
     - Infrastructure:
         - ArgoCD:
             icon: argocd.svg
             href: http://argocd.octolet.int
             description: GitOps delivery (anonymous read-only)
             siteMonitor: http://argocd-server.argocd:80
-        - Headlamp:
-            icon: kubernetes.svg
-            href: http://headlamp.octolet.int
-            description: K8s dashboard (HA, 3 replicas)
-            siteMonitor: http://headlamp.kube-system:80
         - Twingate Gateway:
             icon: twingate.svg
             description: L7 proxy · K8s API · SSH · JWT
@@ -98,7 +76,7 @@ data:
             description: WebApp with JWT header injection
         - SSH Server:
             icon: mdi-console
-            description: SSH cert auth · ssh.octolet.int
+            description: SSH cert auth · ssh ssh.octolet.int
         - Grafana Basic:
             icon: grafana.svg
             href: http://grafana-basic.octolet.int
