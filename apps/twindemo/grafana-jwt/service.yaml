@@ -9,7 +9,7 @@ metadata:
     resource.twingate.com/name: "Demo · Grafana (JWT)"
     resource.twingate.com/gatewayName: "twop-gateway"
     resource.twingate.com/gatewayNamespace: "twingate"
-    resource.twingate.com/alias: "grafana-jwt.octolet.int"
+    resource.twingate.com/alias: "grafana.octolet.int"
     resource.twingate.com/downstreamPort: "80"
     resource.twingate.com/requestHeaderRewrites: '{"X-JWT-Assertion": "{{jwt}}"}'
 spec:
