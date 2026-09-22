@@ -19,6 +19,31 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: twingate
+  ignoreDifferences:
+    - group: twingate.com
+      kind: TwingateConnector
+      jsonPointers:
+        - /spec/id
+        - /status
+    - group: twingate.com
+      kind: TwingateResource
+      jsonPointers:
+        - /spec/id
+        - /status
+    - group: twingate.com
+      kind: TwingateGateway
+      jsonPointers:
+        - /spec/id
+        - /status
+    - group: twingate.com
+      kind: TwingateCertificateAuthority
+      jsonPointers:
+        - /spec/id
+        - /status
+    - group: twingate.com
+      kind: TwingateResourceAccess
+      jsonPointers:
+        - /status
   syncPolicy:
     automated:
       prune: true
@@ -26,3 +51,4 @@ spec:
     syncOptions:
       - CreateNamespace=true
       - ServerSideApply=true
+      - RespectIgnoreDifferences=true
