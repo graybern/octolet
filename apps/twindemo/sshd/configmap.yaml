@@ -16,8 +16,10 @@ data:
   setup.sh: |
     #!/bin/sh
     set -e
-    apk add --no-cache openssh bash
-    mkdir -p /run/sshd
+    apk add --no-cache openssh bash shadow
+    mkdir -p /run/sshd /var/empty
+    addgroup -S sshd 2>/dev/null || true
+    adduser -S -G sshd -H -h /var/empty -s /sbin/nologin sshd 2>/dev/null || true
     ssh-keygen -y -f /etc/ssh/ca_key > /etc/ssh/twingate_ca.pub
     cp /scripts/sshd_config /etc/ssh/sshd_config_custom
     adduser -D -s /bin/bash ubuntu 2>/dev/null || true
