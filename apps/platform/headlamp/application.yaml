@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: headlamp-stack
+  namespace: argocd
+spec:
+  project: octolet
+  sources:
+    - repoURL: https://kubernetes-sigs.github.io/headlamp/
+      chart: headlamp
+      targetRevision: "0.45.0"
+      helm:
+        releaseName: headlamp
+        valueFiles:
+          - $values/apps/platform/headlamp/values.yaml
+    - repoURL: https://github.com/graybern/octolet
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

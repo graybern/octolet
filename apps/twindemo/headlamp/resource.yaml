@@ -1,0 +1,17 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResource
+metadata:
+  name: headlamp-resource
+  namespace: default
+spec:
+  type: WebApp
+  name: "Infra · Headlamp"
+  address: headlamp.kube-system.svc.cluster.local
+  alias: "headlamp.octolet.int"
+  gatewayRef:
+    name: twop-gateway
+    namespace: twingate
+  downstream:
+    port: 80
+  upstream:
+    port: 80

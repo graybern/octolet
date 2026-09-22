@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: headlamp-access
+  namespace: default
+spec:
+  resourceRef:
+    name: headlamp-resource
+    namespace: default
+  principalExternalRef:
+    type: group
+    name: Admins
