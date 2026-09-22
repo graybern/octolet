@@ -61,30 +61,26 @@ data:
             href: http://argocd.octolet.int
             description: GitOps delivery (anonymous read-only)
             siteMonitor: http://argocd-server.argocd:80
-        - Twingate Gateway:
-            icon: twingate.svg
-            description: L7 proxy · K8s API · SSH · JWT
-            siteMonitor: http://twop-gateway.twingate:9090/metrics
-        - Twingate Connectors:
-            icon: twingate.svg
-            description: 2x connectors (prem-tejon-octolet)
+        - Prometheus:
+            icon: prometheus.svg
+            href: http://prometheus.octolet.int
+            description: Metrics & alerting
+            siteMonitor: http://prometheus-stack-kube-prom-prometheus.monitoring:9090
+        - AlertManager:
+            icon: alertmanager.svg
+            href: http://alertmanager.octolet.int
+            description: Alert routing
+            siteMonitor: http://alertmanager-operated.monitoring:9093
 
     - Twingate Demo:
         - httpbin (JWT):
             icon: mdi-api
             href: http://app.int
             description: WebApp with JWT header injection
-        - SSH Server:
-            icon: mdi-console
-            description: SSH cert auth · ssh ssh.octolet.int
         - Grafana Basic:
             icon: grafana.svg
             href: http://grafana-basic.octolet.int
             description: Grafana via L4 tunnel (password auth)
-        - sshd Pod:
-            icon: mdi-server
-            description: ubuntu:24.04 · Twingate CA trust
-            siteMonitor: http://sshd.default:22
 
   docker.yaml: ""
 
