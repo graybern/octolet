@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: wetty-access
+  namespace: default
+spec:
+  resourceRef:
+    name: wetty-resource
+    namespace: default
+  principalExternalRef:
+    type: group
+    name: Admins

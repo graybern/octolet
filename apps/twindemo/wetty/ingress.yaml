@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wetty
+  namespace: default
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Web SSH"
+    gethomepage.dev/group: "Twingate Demo"
+    gethomepage.dev/icon: "mdi-console-network"
+    gethomepage.dev/description: "Browser-based SSH (cert auth)"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - wetty.octolet.int
+  rules:
+    - host: wetty.octolet.int
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wetty
+                port:
+                  number: 80
