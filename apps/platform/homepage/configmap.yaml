@@ -21,7 +21,7 @@ data:
         columns: 3
       Infrastructure:
         style: row
-        columns: 3
+        columns: 5
       Twingate Demo:
         style: row
         columns: 4
@@ -71,6 +71,14 @@ data:
             href: http://alertmanager.octolet.int
             description: Alert routing
             siteMonitor: http://alertmanager-operated.monitoring:9093
+        - Loki:
+            icon: loki.svg
+            description: Log aggregation (monolithic)
+            siteMonitor: http://loki.monitoring:3100/ready
+        - Tempo:
+            icon: tempo.svg
+            description: Trace backend (monolithic)
+            siteMonitor: http://tempo.monitoring:3200/ready
 
     - Twingate Demo:
         - httpbin (JWT):
