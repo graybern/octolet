@@ -58,29 +58,29 @@ data:
     - Observability:
         - Grafana:
             icon: grafana.svg
-            href: https://grafana.octolet.int
+            href: http://grafana.octolet.int
             description: Dashboards (JWT auto-login via Twingate)
             siteMonitor: http://grafana.monitoring:80
         - Prometheus:
             icon: prometheus.svg
-            href: https://prometheus.octolet.int
+            href: http://prometheus.octolet.int
             description: Metrics & alerting
             siteMonitor: http://prometheus-stack-kube-prom-prometheus.monitoring:9090
         - AlertManager:
             icon: alertmanager.svg
-            href: https://alertmanager.octolet.int
+            href: http://alertmanager.octolet.int
             description: Alert routing
             siteMonitor: http://alertmanager-operated.monitoring:9093
 
     - Infrastructure:
         - ArgoCD:
             icon: argocd.svg
-            href: https://argocd.octolet.int
+            href: http://argocd.octolet.int
             description: GitOps delivery (anonymous read-only)
             siteMonitor: http://argocd-server.argocd:80
         - Headlamp:
             icon: kubernetes.svg
-            href: https://headlamp.octolet.int
+            href: http://headlamp.octolet.int
             description: K8s dashboard (HA, 3 replicas)
             siteMonitor: http://headlamp.kube-system:80
         - Twingate Gateway:
@@ -94,14 +94,14 @@ data:
     - Twingate Demo:
         - httpbin (JWT):
             icon: mdi-api
-            href: https://app.int
+            href: http://app.int
             description: WebApp with JWT header injection
         - SSH Server:
             icon: mdi-console
             description: SSH cert auth · ssh.octolet.int
         - Grafana Basic:
             icon: grafana.svg
-            href: https://grafana-basic.octolet.int
+            href: http://grafana-basic.octolet.int
             description: Grafana via L4 tunnel (password auth)
         - sshd Pod:
             icon: mdi-server
@@ -120,7 +120,7 @@ data:
               href: https://gbernard.twingate.com
         - ArgoCD:
             - icon: argocd.svg
-              href: https://argocd.octolet.int
+              href: http://argocd.octolet.int
         - Architecture Diagram:
             - icon: mdi-sitemap
               href: https://github.com/graybern/octolet/blob/main/docs/architecture.md
