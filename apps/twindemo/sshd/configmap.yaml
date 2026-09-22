@@ -14,17 +14,16 @@ data:
     HostKey /etc/ssh/ssh_host_rsa_key
     HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
   setup.sh: |
-    #!/bin/bash
+    #!/bin/sh
     set -e
-    apt-get update && apt-get install -y openssh-server
-    mkdir -p /run/sshd /etc/ssh
+    apk add --no-cache openssh bash
+    mkdir -p /run/sshd
     ssh-keygen -y -f /etc/ssh/ca_key > /etc/ssh/twingate_ca.pub
     cp /scripts/sshd_config /etc/ssh/sshd_config_custom
-    id ubuntu &>/dev/null || useradd -m -s /bin/bash ubuntu
+    adduser -D -s /bin/bash ubuntu 2>/dev/null || true
     echo "ubuntu:octolet" | chpasswd
     passwd -u ubuntu
     ssh-keygen -A
-    # Sign host keys with CA so the Gateway trusts them after pod restarts
     ssh-keygen -s /etc/ssh/ca_key -I sshd-host -h /etc/ssh/ssh_host_ed25519_key.pub 2>/dev/null || true
     ssh-keygen -s /etc/ssh/ca_key -I sshd-host -h /etc/ssh/ssh_host_rsa_key.pub 2>/dev/null || true
     exec /usr/sbin/sshd -D -e -f /etc/ssh/sshd_config_custom

@@ -17,17 +17,31 @@ spec:
     spec:
       containers:
         - name: sshd
-          image: ubuntu:24.04
-          command: ["bash", "/scripts/setup.sh"]
+          image: alpine:latest
+          command: ["sh", "/scripts/setup.sh"]
           ports:
             - containerPort: 2222
           resources:
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 20m
+              memory: 32Mi
             limits:
-              cpu: 500m
-              memory: 512Mi
+              cpu: 200m
+              memory: 128Mi
+          startupProbe:
+            tcpSocket:
+              port: 2222
+            initialDelaySeconds: 5
+            failureThreshold: 10
+            periodSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: 2222
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 2222
+            periodSeconds: 10
           volumeMounts:
             - name: ca-key
               mountPath: /etc/ssh/ca_key
