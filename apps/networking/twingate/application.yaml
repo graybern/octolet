@@ -20,6 +20,11 @@ spec:
     server: https://kubernetes.default.svc
     namespace: twingate
   ignoreDifferences:
+    - group: ""
+      kind: Secret
+      name: twop-gateway-tls
+      jsonPointers:
+        - /data
     - group: twingate.com
       kind: TwingateConnector
       jsonPointers:
