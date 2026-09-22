@@ -5,6 +5,9 @@ metadata:
   namespace: admin
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - homepage.octolet.int
   rules:
     - host: homepage.octolet.int
       http:
