@@ -42,7 +42,7 @@
 
 9. **JWT auth on production Grafana (not separate demo instance).** **Why:** Avoids running two Grafana instances on Pi hardware. Password auth kept as fallback for direct Traefik access. **Trade-off:** JWT config is in the production Grafana values.
 
-10. **ArgoCD behind Gateway with anonymous read-only.** **Why:** ArgoCD doesn't support header-based JWT auth like Grafana. Anonymous read-only + Gateway access control gives passwordless viewing. **Trade-off:** No user identity in ArgoCD audit logs; write operations require CLI.
+10. **ArgoCD anonymous read-only (no Gateway proxy).** **Why:** ArgoCD doesn't support header-based JWT auth. Anonymous read-only via Traefik is sufficient — Twingate controls network access to the cluster already. A Gateway proxy adds no value over Traefik here. **Trade-off:** No user identity in ArgoCD audit logs; write operations require CLI. OIDC SSO tracked in TODO.md.
 
 ### Data Flow
 
@@ -170,7 +170,6 @@ Current manual secrets:
 
 **Twingate Gateway** (`*.octolet.int` / `*.int`, L7 proxy with JWT/SSH):
 - `grafana-jwt.octolet.int` — Grafana (auto-login via JWT)
-- `argocd-gw.octolet.int` — ArgoCD (anonymous read-only)
 - `app.int` — httpbin (WebApp with JWT)
 - `ssh.octolet.int` — sshd (SSH cert auth)
 - `api-k8s.octolet.int` — K8s API (kubectl via Gateway)

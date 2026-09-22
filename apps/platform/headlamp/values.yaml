@@ -46,3 +46,4 @@ probes:
 config:
   inCluster: true
   inClusterContextName: "main"
+  unsafeUseServiceAccountToken: true

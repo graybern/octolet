@@ -52,7 +52,6 @@ gateway:
       - "app.int"
       - "grafana-jwt.octolet.int"
       - "ssh.octolet.int"
-      - "argocd-gw.octolet.int"
       - "headlamp.octolet.int"
       - "*.default.svc.cluster.local"
   metrics:

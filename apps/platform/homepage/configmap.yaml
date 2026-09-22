@@ -21,7 +21,7 @@ data:
         columns: 3
       Infrastructure:
         style: row
-        columns: 4
+        columns: 3
       Demo Apps:
         style: row
         columns: 4
