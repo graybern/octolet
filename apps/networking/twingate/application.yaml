@@ -25,6 +25,7 @@ spec:
       name: twop-gateway-tls
       jsonPointers:
         - /data
+        - /metadata/annotations
     - group: twingate.com
       kind: TwingateConnector
       jsonPointers:
