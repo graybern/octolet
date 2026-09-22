@@ -16,15 +16,6 @@ spec:
         app: homepage
     spec:
       serviceAccountName: homepage
-      initContainers:
-        - name: copy-config
-          image: busybox:latest
-          command: ["sh", "-c", "cp /config-source/* /app/config/"]
-          volumeMounts:
-            - name: homepage-config-source
-              mountPath: /config-source
-            - name: homepage-config
-              mountPath: /app/config
       containers:
         - name: homepage
           image: ghcr.io/gethomepage/homepage:latest
@@ -34,9 +25,45 @@ spec:
           env:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: "homepage.octolet.int"
+          startupProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            failureThreshold: 10
+            periodSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 10
+            failureThreshold: 3
           volumeMounts:
-            - name: homepage-config
+            - name: homepage-config-base
               mountPath: /app/config
+            - name: homepage-config
+              mountPath: /app/config/settings.yaml
+              subPath: settings.yaml
+            - name: homepage-config
+              mountPath: /app/config/kubernetes.yaml
+              subPath: kubernetes.yaml
+            - name: homepage-config
+              mountPath: /app/config/widgets.yaml
+              subPath: widgets.yaml
+            - name: homepage-config
+              mountPath: /app/config/services.yaml
+              subPath: services.yaml
+            - name: homepage-config
+              mountPath: /app/config/bookmarks.yaml
+              subPath: bookmarks.yaml
+            - name: homepage-config
+              mountPath: /app/config/docker.yaml
+              subPath: docker.yaml
+            - name: logs
+              mountPath: /app/config/logs
           resources:
             requests:
               cpu: 50m
@@ -45,8 +72,10 @@ spec:
               cpu: 200m
               memory: 256Mi
       volumes:
-        - name: homepage-config-source
+        - name: homepage-config-base
+          emptyDir: {}
+        - name: homepage-config
           configMap:
             name: homepage-config
-        - name: homepage-config
+        - name: logs
           emptyDir: {}
