@@ -21,8 +21,8 @@ data:
         columns: 3
       Infrastructure:
         style: row
-        columns: 3
-      Demo Apps:
+        columns: 4
+      Twingate Demo:
         style: row
         columns: 4
       Cluster:
@@ -59,7 +59,7 @@ data:
         - Grafana:
             icon: grafana.svg
             href: https://grafana.octolet.int
-            description: Dashboards & visualization
+            description: Dashboards (JWT auto-login via Twingate)
             siteMonitor: http://grafana.monitoring:80
         - Prometheus:
             icon: prometheus.svg
@@ -76,7 +76,7 @@ data:
         - ArgoCD:
             icon: argocd.svg
             href: https://argocd.octolet.int
-            description: GitOps delivery
+            description: GitOps delivery (anonymous read-only)
             siteMonitor: http://argocd-server.argocd:80
         - Headlamp:
             icon: kubernetes.svg
@@ -85,42 +85,28 @@ data:
             siteMonitor: http://headlamp.kube-system:80
         - Twingate Gateway:
             icon: twingate.svg
-            description: K8s API + SSH + WebApp proxy
+            description: L7 proxy · K8s API · SSH · JWT
             siteMonitor: http://twop-gateway.twingate:9090/metrics
         - Twingate Connectors:
             icon: twingate.svg
             description: 2x connectors (prem-tejon-octolet)
 
-    - Demo Apps:
+    - Twingate Demo:
         - httpbin (JWT):
             icon: mdi-api
             href: https://app.int
-            description: WebApp with JWT auth
+            description: WebApp with JWT header injection
         - SSH Server:
             icon: mdi-console
-            description: SSH via Twingate Gateway
-        - Grafana JWT:
-            icon: grafana.svg
-            href: https://grafana-jwt.octolet.int
-            description: Grafana with SSO via JWT
+            description: SSH cert auth · ssh.octolet.int
         - Grafana Basic:
             icon: grafana.svg
             href: https://grafana-basic.octolet.int
-            description: Grafana with password auth
-
-    - Cluster:
-        - Nodes:
-            widget:
-              type: kubernetes
-              cluster:
-                show: true
-                cpu: true
-                memory: true
-        - Storage:
-            widget:
-              type: kubernetes
-              nodes:
-                show: true
+            description: Grafana via L4 tunnel (password auth)
+        - sshd Pod:
+            icon: mdi-server
+            description: ubuntu:24.04 · Twingate CA trust
+            siteMonitor: http://sshd.default:22
 
   docker.yaml: ""
 
@@ -135,3 +121,6 @@ data:
         - ArgoCD:
             - icon: argocd.svg
               href: https://argocd.octolet.int
+        - Architecture Diagram:
+            - icon: mdi-sitemap
+              href: https://github.com/graybern/octolet/blob/main/docs/architecture.md
