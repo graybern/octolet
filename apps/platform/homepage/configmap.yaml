@@ -18,10 +18,10 @@ data:
     layout:
       Observability:
         style: row
-        columns: 3
+        columns: 5
       Infrastructure:
         style: row
-        columns: 5
+        columns: 3
       Twingate Demo:
         style: row
         columns: 4
@@ -55,12 +55,7 @@ data:
           timeStyle: short
 
   services.yaml: |
-    - Infrastructure:
-        - ArgoCD:
-            icon: argocd.svg
-            href: http://argocd.octolet.int
-            description: GitOps delivery (anonymous read-only)
-            siteMonitor: http://argocd-server.argocd:80
+    - Observability:
         - Prometheus:
             icon: prometheus.svg
             href: http://prometheus.octolet.int
@@ -74,13 +69,20 @@ data:
         - Loki:
             icon: loki.svg
             href: http://loki.octolet.int/ring
-            description: Log aggregation (monolithic)
+            description: Log aggregation (ring status)
             siteMonitor: http://loki.monitoring:3100/ready
         - Tempo:
             icon: tempo.svg
             href: http://tempo.octolet.int/status
-            description: Trace backend (monolithic)
+            description: Trace backend (status page)
             siteMonitor: http://tempo.monitoring:3200/ready
+
+    - Infrastructure:
+        - ArgoCD:
+            icon: argocd.svg
+            href: http://argocd.octolet.int
+            description: GitOps delivery (anonymous read-only)
+            siteMonitor: http://argocd-server.argocd:80
 
     - Twingate Demo:
         - httpbin (JWT):

@@ -164,6 +164,69 @@ ApplicationSet (appconfig/applicationset.yaml)
 - `twingate:gateway_request_rate:5m`
 - `twingate:gateway_active_connections`
 
+## Observability Web Endpoints
+
+Each observability component exposes HTTP endpoints. Prometheus and AlertManager have full web UIs. Loki and Tempo are backend data stores — their web pages are operational/debugging views, not user-facing dashboards. All log/trace querying is done through **Grafana Explore**.
+
+### Prometheus (`prometheus.octolet.int`)
+
+Full web UI. Root redirects to `/graph`.
+
+| Route | Purpose |
+|-------|---------|
+| `/graph` | Query UI — PromQL editor, graph visualization |
+| `/targets` | All scrape targets and their health |
+| `/alerts` | Active alert rules and their states |
+| `/status/config` | Runtime configuration |
+| `/status/flags` | Command-line flags |
+| `/status/tsdb` | Time-series database stats |
+| `/service-discovery` | Service discovery targets |
+
+### AlertManager (`alertmanager.octolet.int`)
+
+Full web UI at root.
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Alert dashboard — active alerts, silences |
+| `/#/alerts` | Alert list view |
+| `/#/silences` | Silence management |
+| `/#/status` | Cluster status, config |
+
+### Loki (`loki.octolet.int`)
+
+No root page (404). Backend data store for logs — query via Grafana Explore. Web pages are operational views.
+
+| Route | Purpose |
+|-------|---------|
+| `/ring` | Hash ring — shows which instance owns which data shards |
+| `/memberlist` | Gossip protocol peers (cluster membership) |
+| `/config` | Full runtime config dump |
+| `/services` | Internal service dependency graph and states |
+| `/compactor/ring` | Compaction process ring status |
+| `/ready` | Health check (200 = healthy) |
+| `/metrics` | Prometheus-format internal metrics |
+| `/loki/api/v1/labels` | API: all log label names (used by Grafana) |
+| `/loki/api/v1/status/buildinfo` | Build version info |
+
+### Tempo (`tempo.octolet.int`)
+
+No root page (404). Backend data store for traces — query via Grafana Explore. Web pages are operational views.
+
+| Route | Purpose |
+|-------|---------|
+| `/status` | Version and build info |
+| `/status/config` | Full runtime config dump |
+| `/status/services` | Internal service states |
+| `/status/endpoints` | All registered API routes |
+| `/ready` | Health check (200 = healthy) |
+| `/metrics` | Prometheus-format internal metrics |
+| `/api/search` | Trace search API (used by Grafana) |
+
+### Why Loki/Tempo Have No Root Page
+
+Prometheus and AlertManager are **end-user tools** — designed for humans to browse directly. Loki and Tempo are **backend data stores** — like databases with HTTP APIs. Their "UI" is Grafana, which connects to their APIs (`/loki/api/v1/*`, `/api/search`, `/api/traces/{id}`) for querying. The `/ring`, `/status`, `/config` pages exist for operators to debug cluster health, not for end users.
+
 ## Storage Strategy
 
 **Current:** local-path provisioner (K3s default). Data lives on each node's SSD/SD card. Not replicated — a node failure loses that node's PVC data.
