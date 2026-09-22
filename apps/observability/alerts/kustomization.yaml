@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - cluster-alerts.yaml
   - twingate-alerts.yaml
+  - twingate-resources.yaml
