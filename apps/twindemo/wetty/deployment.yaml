@@ -54,7 +54,6 @@ spec:
             - --ssh-auth=publickey
             - --ssh-key=/certs/key
             - --allow-remote-command
-            - --force-ssh
             - --port=3000
             - --base=/
           ports:
@@ -71,15 +70,22 @@ spec:
             limits:
               cpu: 100m
               memory: 128Mi
-          readinessProbe:
+          startupProbe:
             tcpSocket:
               port: 3000
             initialDelaySeconds: 5
+            failureThreshold: 10
+            periodSeconds: 3
+          readinessProbe:
+            tcpSocket:
+              port: 3000
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
               port: 3000
+            initialDelaySeconds: 10
             periodSeconds: 10
+            failureThreshold: 5
       volumes:
         - name: ca-key
           secret:
