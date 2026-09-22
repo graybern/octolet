@@ -10,7 +10,10 @@ metadata:
     resource.twingate.com/gatewayName: "twop-gateway"
     resource.twingate.com/gatewayNamespace: "twingate"
     resource.twingate.com/alias: "argocd-gw.octolet.int"
-    resource.twingate.com/downstreamPort: "443"
+    resource.twingate.com/downstreamPort: "80"
 spec:
   type: ExternalName
   externalName: argocd-server.argocd.svc.cluster.local
+  ports:
+    - port: 80
+      protocol: TCP

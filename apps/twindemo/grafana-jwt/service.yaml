@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-jwt
+  namespace: monitoring
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/type: "WebApp"
+    resource.twingate.com/name: "Demo · Grafana (JWT)"
+    resource.twingate.com/gatewayName: "twop-gateway"
+    resource.twingate.com/gatewayNamespace: "twingate"
+    resource.twingate.com/alias: "grafana-jwt.octolet.int"
+    resource.twingate.com/downstreamPort: "80"
+    resource.twingate.com/requestHeaderRewrites: '{"X-JWT-Assertion": "{{jwt}}"}'
+spec:
+  selector:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/instance: grafana
+  ports:
+    - port: 80
+      targetPort: 3000
+      protocol: TCP
