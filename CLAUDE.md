@@ -44,6 +44,41 @@
 
 10. **ArgoCD anonymous read-only (no Gateway proxy).** **Why:** ArgoCD doesn't support header-based JWT auth. Anonymous read-only via Traefik is sufficient — Twingate controls network access to the cluster already. A Gateway proxy adds no value over Traefik here. **Trade-off:** No user identity in ArgoCD audit logs; write operations require CLI. OIDC SSO tracked in TODO.md.
 
+11. **Alpine for custom pods (not ubuntu).** **Why:** `apk add openssh` takes ~2s vs `apt-get install openssh-server` taking ~2min on ARM64. Alpine images are 4MB vs 80MB. Critical for pods that install packages at startup. **Trade-off:** Some tools need Alpine-specific packages (e.g., `shadow` for `chpasswd`).
+
+12. **SSH cert auth via shared CA.** **Why:** The Twingate SSH Gateway signs user certs with a CA. The sshd pod trusts that CA via `TrustedUserCAKeys`. Host keys are also signed with the CA so the Gateway accepts pod restarts without host key mismatch errors. Same CA for user certs (Gateway→sshd) and host certs (sshd→Gateway). **Trade-off:** CA private key is mounted in both Gateway and sshd pods.
+
+13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
+
+## Current State (2026-09-22)
+
+### Deployed and Working
+- **LGTMP stack**: Prometheus, Grafana (JWT auto-login), Loki, Tempo, Alloy (5 nodes), AlertManager
+- **Twingate**: Operator v2.0.2 (ArgoCD-managed), Gateway (L7: K8s API, SSH, WebApp), 2 Connectors
+- **Demo apps**: sshd (cert auth via SSH Gateway), httpbin (WebApp JWT), Grafana Basic (L4 tunnel)
+- **Platform**: Homepage (auto-discovery via Ingress annotations), Headlamp (HA, 3 replicas, auto-auth), Wetty (web SSH, cert auth)
+- **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
+- **Architecture diagram**: `docs/architecture.html` (interactive HTML)
+
+### TwingateResources (8 total)
+| Name | Type | Alias |
+|------|------|-------|
+| Infra · K8s API | Kubernetes | `api-k8s.octolet.int` |
+| Demo · Grafana (JWT) | WebApp | `grafana.octolet.int` |
+| Infra · Headlamp | WebApp | `headlamp.octolet.int` |
+| Demo · Web App (JWT) | WebApp | `app.int` |
+| Infra · Homepage | Network | `homepage.octolet.int` |
+| Demo · Grafana (Basic Auth) | Network | `grafana-basic.octolet.int` |
+| Infra · Prometheus | Network | `prometheus.octolet.int` |
+| Infra · AlertManager | Network | `alertmanager.octolet.int` |
+
+SSH resource (`Demo · SSH Server` at `ssh.octolet.int`) created via Twingate API — operator v2.0.2 doesn't support SSH-type CRDs.
+
+### Manual Secrets on Cluster
+- `twingate-operator-api-key` in `twingate` ns
+- `grafana-admin` in `monitoring` ns
+- `twingate-ssh-ca` in `twingate` ns AND `default` ns (same key, both needed)
+
 ### Data Flow
 
 ```
