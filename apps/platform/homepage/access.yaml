@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: homepage-access
+  namespace: admin
+spec:
+  resourceRef:
+    name: homepage-resource
+    namespace: admin
+  principalExternalRef:
+    type: group
+    name: Admins

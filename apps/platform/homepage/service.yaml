@@ -5,6 +5,10 @@ metadata:
   namespace: admin
   labels:
     app: homepage
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Infra · Homepage"
+    resource.twingate.com/alias: "homepage.octolet.int"
 spec:
   type: ClusterIP
   ports:
