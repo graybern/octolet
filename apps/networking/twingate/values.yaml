@@ -50,7 +50,7 @@ gateway:
   tls:
     dnsNames:
       - "app.int"
-      - "grafana-jwt.octolet.int"
+      - "grafana.octolet.int"
       - "ssh.octolet.int"
       - "headlamp.octolet.int"
       - "*.default.svc.cluster.local"

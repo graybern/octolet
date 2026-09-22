@@ -2,11 +2,11 @@ apiVersion: twingate.com/v1beta
 kind: TwingateResourceAccess
 metadata:
   name: grafana-jwt-access
-  namespace: default
+  namespace: monitoring
 spec:
   resourceRef:
     name: grafana-jwt-resource
-    namespace: default
+    namespace: monitoring
   principalExternalRef:
     type: group
     name: Admins
