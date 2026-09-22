@@ -27,6 +27,12 @@ alertmanager:
   ingress:
     enabled: true
     ingressClassName: traefik
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/name: "AlertManager"
+      gethomepage.dev/group: "Observability"
+      gethomepage.dev/icon: "alertmanager.svg"
+      gethomepage.dev/description: "Alert routing"
     hosts:
       - alertmanager.octolet.int
   config:
@@ -76,6 +82,12 @@ prometheus:
   ingress:
     enabled: true
     ingressClassName: traefik
+    annotations:
+      gethomepage.dev/enabled: "true"
+      gethomepage.dev/name: "Prometheus"
+      gethomepage.dev/group: "Observability"
+      gethomepage.dev/icon: "prometheus.svg"
+      gethomepage.dev/description: "Metrics & alerting"
     hosts:
       - prometheus.octolet.int
 

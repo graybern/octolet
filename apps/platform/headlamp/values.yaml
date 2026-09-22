@@ -27,6 +27,12 @@ service:
 ingress:
   enabled: true
   ingressClassName: traefik
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "Headlamp"
+    gethomepage.dev/group: "Infrastructure"
+    gethomepage.dev/icon: "kubernetes.svg"
+    gethomepage.dev/description: "K8s dashboard (HA, 3 replicas)"
   hosts:
     - host: headlamp.octolet.int
       paths:
