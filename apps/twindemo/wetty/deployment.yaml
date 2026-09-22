@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wetty
+  namespace: default
+  labels:
+    app: wetty
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wetty
+  template:
+    metadata:
+      labels:
+        app: wetty
+    spec:
+      initContainers:
+        - name: sign-cert
+          image: alpine:latest
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache openssh-client
+              ssh-keygen -t ed25519 -f /certs/key -N "" -C "wetty-auto"
+              ssh-keygen -s /ca/ssh-privatekey \
+                -I "wetty-user" \
+                -n ubuntu \
+                -V +24h \
+                /certs/key.pub
+              chmod 600 /certs/key
+              ls -la /certs/
+          volumeMounts:
+            - name: ca-key
+              mountPath: /ca
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      containers:
+        - name: wetty
+          image: wettyoss/wetty:latest
+          args:
+            - --ssh-host=sshd.default.svc.cluster.local
+            - --ssh-port=22
+            - --ssh-user=ubuntu
+            - --ssh-auth=publickey
+            - --ssh-key=/certs/key
+            - --allow-remote-command
+            - --force-ssh
+            - --port=3000
+            - --base=/
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          volumeMounts:
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 10
+      volumes:
+        - name: ca-key
+          secret:
+            secretName: twingate-ssh-ca
+            defaultMode: 0400
+        - name: certs
+          emptyDir: {}
