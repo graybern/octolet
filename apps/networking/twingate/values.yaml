@@ -30,6 +30,8 @@ gateway:
   twingateOperator:
     gateway:
       enabled: true
+      certificateAuthority:
+        name: "octolet-gateway-ca"
     kubernetesResource:
       enabled: true
       name: "k8s-prem-tejon-octolet"
