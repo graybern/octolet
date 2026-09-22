@@ -19,9 +19,9 @@ data:
       Observability:
         style: row
         columns: 3
-      Twingate:
+      Infrastructure:
         style: row
-        columns: 3
+        columns: 4
       Demo Apps:
         style: row
         columns: 4
@@ -72,12 +72,17 @@ data:
             description: Alert routing
             siteMonitor: http://alertmanager-operated.monitoring:9093
 
-    - Twingate:
+    - Infrastructure:
         - ArgoCD:
             icon: argocd.svg
             href: https://argocd.octolet.int
             description: GitOps delivery
             siteMonitor: http://argocd-server.argocd:80
+        - Headlamp:
+            icon: kubernetes.svg
+            href: https://headlamp.octolet.int
+            description: K8s dashboard (HA, 3 replicas)
+            siteMonitor: http://headlamp.kube-system:80
         - Twingate Gateway:
             icon: twingate.svg
             description: K8s API + SSH + WebApp proxy
