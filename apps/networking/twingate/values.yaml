@@ -34,7 +34,7 @@ gateway:
         name: "octolet-gateway-ca"
     kubernetesResource:
       enabled: true
-      name: "k8s-prem-tejon-octolet"
+      name: "Infra · K8s API"
       alias: "api-k8s.octolet.int"
   kubernetes:
     enabled: true
