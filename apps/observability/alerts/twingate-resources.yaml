@@ -1,22 +1,36 @@
-apiVersion: twingate.com/v1beta
-kind: TwingateResource
+apiVersion: v1
+kind: Service
 metadata:
-  name: prometheus-resource
+  name: prometheus-tg
   namespace: monitoring
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Infra · Prometheus"
+    resource.twingate.com/alias: "prometheus.octolet.int"
 spec:
-  name: "Infra · Prometheus"
-  address: prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local
-  alias: "prometheus.octolet.int"
+  type: ExternalName
+  externalName: prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local
+  ports:
+    - port: 80
+      targetPort: 9090
+      protocol: TCP
 ---
-apiVersion: twingate.com/v1beta
-kind: TwingateResource
+apiVersion: v1
+kind: Service
 metadata:
-  name: alertmanager-resource
+  name: alertmanager-tg
   namespace: monitoring
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Infra · AlertManager"
+    resource.twingate.com/alias: "alertmanager.octolet.int"
 spec:
-  name: "Infra · AlertManager"
-  address: prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local
-  alias: "alertmanager.octolet.int"
+  type: ExternalName
+  externalName: prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local
+  ports:
+    - port: 80
+      targetPort: 9093
+      protocol: TCP
 ---
 apiVersion: twingate.com/v1beta
 kind: TwingateResourceAccess
@@ -25,7 +39,7 @@ metadata:
   namespace: monitoring
 spec:
   resourceRef:
-    name: prometheus-resource
+    name: prometheus-tg-resource
     namespace: monitoring
   principalExternalRef:
     type: group
@@ -38,7 +52,7 @@ metadata:
   namespace: monitoring
 spec:
   resourceRef:
-    name: alertmanager-resource
+    name: alertmanager-tg-resource
     namespace: monitoring
   principalExternalRef:
     type: group

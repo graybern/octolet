@@ -72,7 +72,7 @@ datasources:
       - name: Tempo
         type: tempo
         uid: tempo
-        url: http://tempo.monitoring:3100
+        url: http://tempo.monitoring:3200
         access: proxy
         jsonData:
           tracesToLogsV2:
