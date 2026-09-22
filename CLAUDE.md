@@ -115,6 +115,37 @@ Every app directory under `apps/` contains:
 
 Some apps have additional manifests (CRDs, Secrets, RBAC) listed in kustomization.yaml.
 
+### Operator CRD Drift (ignoreDifferences)
+
+Kubernetes operators that write back to their own CRs (adding `spec.id`, `status`, finalizers) cause permanent ArgoCD OutOfSync drift — ArgoCD applies the template, the operator enriches the CR, ArgoCD sees the diff and marks it OutOfSync, repeat forever.
+
+Fix: add `ignoreDifferences` to the ArgoCD Application:
+```yaml
+ignoreDifferences:
+  - group: twingate.com
+    kind: TwingateConnector
+    jsonPointers:
+      - /spec/id
+      - /status
+```
+And `RespectIgnoreDifferences=true` in `syncOptions` so auto-sync also honors the ignore list.
+
+This applies to any operator-managed CRD, not just Twingate. The pattern: ignore fields the operator owns (IDs, status, timestamps) and let ArgoCD own the spec fields you define in git.
+
+### Homepage Auto-Discovery (Ingress Annotations)
+
+Services with Ingresses can auto-appear on the Homepage dashboard via annotations instead of manual `services.yaml` entries. Add to any Ingress:
+```yaml
+annotations:
+  gethomepage.dev/enabled: "true"
+  gethomepage.dev/name: "Grafana"
+  gethomepage.dev/group: "Observability"
+  gethomepage.dev/icon: "grafana.svg"
+  gethomepage.dev/description: "Dashboards (JWT auto-login)"
+```
+
+Services without Ingresses (sshd, Twingate Gateway/Connectors) stay as manual entries in `services.yaml`. Mixed approach works fine.
+
 ### ArgoCD Pattern (App-of-Apps)
 
 ```
