@@ -8,8 +8,9 @@ metadata:
     resource.twingate.com/name: "Infra · Prometheus"
     resource.twingate.com/alias: "prometheus.octolet.int"
 spec:
-  type: ExternalName
-  externalName: prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local
+  selector:
+    app.kubernetes.io/name: prometheus
+    app.kubernetes.io/instance: prometheus-stack-kube-prom-prometheus
   ports:
     - port: 80
       targetPort: 9090
@@ -25,11 +26,48 @@ metadata:
     resource.twingate.com/name: "Infra · AlertManager"
     resource.twingate.com/alias: "alertmanager.octolet.int"
 spec:
-  type: ExternalName
-  externalName: prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local
+  selector:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/instance: prometheus-stack-kube-prom-alertmanager
   ports:
     - port: 80
       targetPort: 9093
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loki-tg
+  namespace: monitoring
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Infra · Loki"
+    resource.twingate.com/alias: "loki.octolet.int"
+spec:
+  selector:
+    app.kubernetes.io/name: loki
+    app.kubernetes.io/instance: loki
+  ports:
+    - port: 80
+      targetPort: 3100
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo-tg
+  namespace: monitoring
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Infra · Tempo"
+    resource.twingate.com/alias: "tempo.octolet.int"
+spec:
+  selector:
+    app.kubernetes.io/name: tempo
+    app.kubernetes.io/instance: tempo
+  ports:
+    - port: 80
+      targetPort: 3200
       protocol: TCP
 ---
 apiVersion: twingate.com/v1beta
@@ -53,6 +91,32 @@ metadata:
 spec:
   resourceRef:
     name: alertmanager-tg-resource
+    namespace: monitoring
+  principalExternalRef:
+    type: group
+    name: Admins
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: loki-access
+  namespace: monitoring
+spec:
+  resourceRef:
+    name: loki-tg-resource
+    namespace: monitoring
+  principalExternalRef:
+    type: group
+    name: Admins
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: tempo-access
+  namespace: monitoring
+spec:
+  resourceRef:
+    name: tempo-tg-resource
     namespace: monitoring
   principalExternalRef:
     type: group
