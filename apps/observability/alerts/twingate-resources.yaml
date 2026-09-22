@@ -1,0 +1,45 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResource
+metadata:
+  name: prometheus-resource
+  namespace: monitoring
+spec:
+  name: "Infra · Prometheus"
+  address: prometheus-stack-kube-prom-prometheus.monitoring.svc.cluster.local
+  alias: "prometheus.octolet.int"
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateResource
+metadata:
+  name: alertmanager-resource
+  namespace: monitoring
+spec:
+  name: "Infra · AlertManager"
+  address: prometheus-stack-kube-prom-alertmanager.monitoring.svc.cluster.local
+  alias: "alertmanager.octolet.int"
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: prometheus-access
+  namespace: monitoring
+spec:
+  resourceRef:
+    name: prometheus-resource
+    namespace: monitoring
+  principalExternalRef:
+    type: group
+    name: Admins
+---
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: alertmanager-access
+  namespace: monitoring
+spec:
+  resourceRef:
+    name: alertmanager-resource
+    namespace: monitoring
+  principalExternalRef:
+    type: group
+    name: Admins
