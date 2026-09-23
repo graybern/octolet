@@ -227,6 +227,116 @@ No root page (404). Backend data store for traces — query via Grafana Explore.
 
 Prometheus and AlertManager are **end-user tools** — designed for humans to browse directly. Loki and Tempo are **backend data stores** — like databases with HTTP APIs. Their "UI" is Grafana, which connects to their APIs (`/loki/api/v1/*`, `/api/search`, `/api/traces/{id}`) for querying. The `/ring`, `/status`, `/config` pages exist for operators to debug cluster health, not for end users.
 
+## TLS and SSH Certificate Lifecycle
+
+### First Deploy (one-time)
+
+```
+1. ArgoCD syncs the twingate-operator Helm chart
+2. Helm template runs genSelfSignedCert → generates TLS cert + CA
+3. Chart renders:
+   - Secret "twop-gateway-tls" (tls.crt, tls.key, ca.crt)
+   - TwingateCertificateAuthority CR "twop-gateway-ca" (references the Secret)
+   - TwingateGateway CR "twop-gateway"
+4. ArgoCD applies all resources to the cluster
+5. Operator sees TwingateCertificateAuthority CR:
+   - Reads ca.crt from the Secret
+   - Calls x509CertificateAuthorityCreate API → registers CA with Twingate cloud
+   - Cloud records: "I trust certs signed by this CA"
+6. Operator sees TwingateGateway CR:
+   - Calls gatewayCreate API → registers Gateway with cloud
+   - Associates the X509 CA and SSH CA with the Gateway
+7. Gateway pod starts:
+   - Loads TLS cert from Secret
+   - Loads SSH CA private key from twingate-ssh-ca Secret
+   - Starts listening on :8443
+8. Connectors connect to Gateway via Twingate relays:
+   - Relay verifies Gateway's TLS cert against the registered CA → accepted
+   - Tunnel established
+```
+
+### Every ArgoCD Sync (ongoing, automated)
+
+```
+1. ArgoCD re-renders the Helm template
+2. genSelfSignedCert generates a NEW cert (different keys every time)
+3. ArgoCD compares desired (new cert) vs live (current cert):
+   - ignoreDifferences on /data and /metadata/annotations → IGNORES the diff
+   - Secret stays unchanged on the cluster
+4. All other resources (ConfigMap, CRDs, Deployments) sync normally
+5. Gateway continues serving the ORIGINAL cert
+6. Cloud still trusts it → no disruption
+```
+
+### Every Gateway Pod Restart
+
+```
+1. Old Gateway pod terminates
+2. New Gateway pod starts
+3. Pod mounts the SAME TLS Secret (unchanged, frozen by ignoreDifferences)
+4. Pod loads the same cert + SSH CA key
+5. Starts SSH proxy, HTTP proxy (K8s, WebApp), metrics server
+6. Connectors reconnect:
+   - Relay verifies TLS cert → same cert as before → accepted
+   - Brief reconnection delay (~5-10 seconds), then all connections resume
+7. No host key mismatch because the cert hasn't changed
+```
+
+### Every sshd Pod Restart
+
+```
+1. Old sshd pod terminates
+2. New sshd pod starts, runs setup.sh:
+   a. apk add openssh bash shadow (~2 seconds on Alpine)
+   b. Creates sshd system user (privilege separation)
+   c. Creates/unlocks ubuntu user with password
+   d. ssh-keygen -A → generates NEW host keys (different every restart)
+   e. ssh-keygen -y -f /etc/ssh/ca_key → extracts CA public key
+   f. ssh-keygen -s /etc/ssh/ca_key -h → SIGNS host keys with CA
+   g. Starts sshd with TrustedUserCAKeys and HostCertificate
+3. Gateway connects to sshd for SSH sessions:
+   - sshd presents CA-signed host certificate
+   - Gateway verifies: "Is this host cert signed by a CA I trust?" → Yes
+   - Connection accepted (regardless of the host key changing)
+4. For user authentication (via Twingate SSH Gateway):
+   - Gateway signs a short-lived user certificate (5min TTL) with the SSH CA
+   - sshd validates user cert against TrustedUserCAKeys (same CA)
+   - User is authenticated as "ubuntu" without a password
+```
+
+### Intentional Cert Rotation (rare, manual)
+
+```
+When: Adding new dnsNames to the TLS cert SAN list
+
+1. Delete the TLS Secret:
+   kubectl delete secret twop-gateway-tls -n twingate
+2. ArgoCD detects the Secret is missing → recreates it with new cert
+3. Delete the TwingateCertificateAuthority CR:
+   kubectl delete twingatecertificateauthority twop-gateway-ca -n twingate
+4. ArgoCD recreates the CR → operator registers new CA with cloud
+5. Restart the Gateway pod:
+   kubectl delete pod -l app.kubernetes.io/name=gateway -n twingate
+6. New pod loads the new cert, cloud trusts the new CA
+```
+
+### Two Trust Chains (independent)
+
+```
+X509 (TLS) — Gateway ↔ Twingate Cloud:
+  CA cert in twop-gateway-tls Secret → registered in cloud
+  Gateway presents TLS cert → cloud verifies against CA
+  Purpose: encrypt and authenticate the Twingate tunnel
+
+SSH — Gateway ↔ sshd:
+  CA key pair in twingate-ssh-ca Secret → registered in cloud
+  Gateway signs USER certs → sshd verifies against TrustedUserCAKeys
+  sshd signs HOST certs → Gateway verifies against same CA
+  Purpose: authenticate SSH sessions (both directions)
+
+These are completely independent. Rotating one doesn't affect the other.
+```
+
 ## Storage Strategy
 
 **Current:** local-path provisioner (K3s default). Data lives on each node's SSD/SD card. Not replicated — a node failure loses that node's PVC data.
