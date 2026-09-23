@@ -7,29 +7,29 @@ alloy:
 
       discovery.kubernetes "pods" {
         role = "pod"
+        selectors {
+          role  = "pod"
+          field = "spec.nodeName=" + sys.env("HOSTNAME")
+        }
       }
 
       discovery.relabel "pod_logs" {
         targets = discovery.kubernetes.pods.targets
 
-        // Drop pods that aren't running
         rule {
           source_labels = ["__meta_kubernetes_pod_phase"]
           regex         = "Pending|Succeeded|Failed|Completed"
           action        = "drop"
         }
 
-        // Build the log file path from pod metadata
         // K3s (containerd): /var/log/pods/<ns>_<pod>_<uid>/<container>/0.log
         rule {
           source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
           separator     = "/"
-          regex         = "^(.+)/(.+)$"
+          replacement   = "/var/log/pods/*$1/*.log"
           target_label  = "__path__"
-          replacement   = "/var/log/pods/*${1}*/${2}/*.log"
         }
 
-        // Standard Kubernetes labels
         rule {
           source_labels = ["__meta_kubernetes_namespace"]
           target_label  = "namespace"
@@ -52,8 +52,20 @@ alloy:
         }
       }
 
+      local.file_match "pod_logs" {
+        path_targets = discovery.relabel.pod_logs.output
+      }
+
       loki.source.file "pod_logs" {
-        targets    = discovery.relabel.pod_logs.output
+        targets    = local.file_match.pod_logs.targets
+        forward_to = [loki.process.pod_logs.receiver]
+      }
+
+      loki.process "pod_logs" {
+        stage.cri {}
+        stage.label_drop {
+          values = ["filename"]
+        }
         forward_to = [loki.write.default.receiver]
       }
 
