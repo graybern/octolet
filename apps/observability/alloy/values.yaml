@@ -20,11 +20,13 @@ alloy:
         }
 
         // Build the log file path from pod metadata
+        // K3s (containerd): /var/log/pods/<ns>_<pod>_<uid>/<container>/0.log
         rule {
           source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
-          target_label  = "__path__"
           separator     = "/"
-          replacement   = "/var/log/pods/*$1/*.log"
+          regex         = "^(.+)/(.+)$"
+          target_label  = "__path__"
+          replacement   = "/var/log/pods/*${1}*/${2}/*.log"
         }
 
         // Standard Kubernetes labels
