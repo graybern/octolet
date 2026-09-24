@@ -25,9 +25,10 @@ env:
 
 grafana.ini:
   server:
-    root_url: https://grafana.octolet.int
+    root_url: http://grafana.octolet.int
   security:
-    cookie_secure: true
+    cookie_secure: false
+    cookie_samesite: lax
 
 ingress:
   enabled: true
