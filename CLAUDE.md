@@ -53,30 +53,44 @@
 ## Current State (2026-09-22)
 
 ### Deployed and Working
-- **LGTMP stack**: Prometheus, Grafana (JWT auto-login), Loki, Tempo, Alloy (5 nodes), AlertManager
-- **Twingate**: Operator v2.0.2 (ArgoCD-managed), Gateway (L7: K8s API, SSH, WebApp), 2 Connectors
-- **Demo apps**: sshd (cert auth via SSH Gateway), httpbin (WebApp JWT), Grafana Basic (L4 tunnel)
-- **Platform**: Homepage (auto-discovery via Ingress annotations), Headlamp (HA, 3 replicas, auto-auth), Wetty (web SSH, cert auth)
+- **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
+- **Twingate**: Operator v2.0.2 (ArgoCD-managed), Gateway (L7: K8s API, SSH, WebApp, TLS cert frozen via ignoreDifferences), 2 Connectors
+- **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
+- **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
+- **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
-### TwingateResources (8 total)
+### TwingateResources (12 total)
 | Name | Type | Alias |
 |------|------|-------|
 | Infra · K8s API | Kubernetes | `api-k8s.octolet.int` |
 | Demo · Grafana (JWT) | WebApp | `grafana.octolet.int` |
 | Infra · Headlamp | WebApp | `headlamp.octolet.int` |
 | Demo · Web App (JWT) | WebApp | `app.int` |
+| Demo · Web SSH | Network | `wetty.octolet.int` |
 | Infra · Homepage | Network | `homepage.octolet.int` |
 | Demo · Grafana (Basic Auth) | Network | `grafana-basic.octolet.int` |
 | Infra · Prometheus | Network | `prometheus.octolet.int` |
 | Infra · AlertManager | Network | `alertmanager.octolet.int` |
+| Infra · Loki | Network | `loki.octolet.int` |
+| Infra · Tempo | Network | `tempo.octolet.int` |
 
 SSH resource (`Demo · SSH Server` at `ssh.octolet.int`) created via Twingate API — operator v2.0.2 doesn't support SSH-type CRDs.
 
+### Pi Touchscreen Access (control-1)
+Grafana and other services accessible from the Pi's Chrome browser via `/etc/hosts` entries:
+```
+10.11.12.101 grafana.octolet.int grafana-basic.octolet.int prometheus.octolet.int alertmanager.octolet.int homepage.octolet.int headlamp.octolet.int argocd.octolet.int
+```
+For ClusterIP access (bypasses Traefik): `10.43.123.214 grafana-basic.octolet.int`
+
+Kiosk mode for dashboards: append `?kiosk&refresh=10s` to any Grafana dashboard URL.
+Best overview dashboard: "Kubernetes / Compute Resources / Cluster"
+
 ### Manual Secrets on Cluster
 - `twingate-operator-api-key` in `twingate` ns
-- `grafana-admin` in `monitoring` ns
+- `grafana-admin` in `monitoring` ns (admin / octolet-admin)
 - `twingate-ssh-ca` in `twingate` ns AND `default` ns (same key, both needed)
 
 ### Data Flow
