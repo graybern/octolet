@@ -309,6 +309,22 @@ This repo adapts proven patterns from `homelab-ops` (the parent GitOps monorepo)
 
 Key difference: no `/environments/` — this repo targets a single cluster. `/common/` replaces the shared module pattern.
 
+## BlinkStick LED Control
+
+### Hardware
+- **BlinkStick Nano** USB LEDs on 4 of 5 nodes, each with 2 independently addressable RGB LEDs (8 total)
+- **Physical left-to-right order**: control-2 (.102) → control-3 (.103) → worker-1 (.104) → worker-2 (.105)
+- control-1 (.101) has no BlinkStick (touchscreen node)
+
+### Application Code
+Lives in a separate repo: `graybern/k8s-blinkstick`. This repo holds only the K8s manifests at `apps/hardware/blinkstick/` and the ad-hoc control script.
+
+### Ad-hoc Control (`scripts/blinkstick.sh`)
+Quick LED control via privileged pods + nsenter into the host's `/opt/venvs/tools/bin/blinkstick` CLI. No container image needed — uses the host's battle-tested Python venv directly.
+
+### K8s Agent (in progress)
+DaemonSet agent + Mosquitto MQTT broker at `apps/hardware/blinkstick/`. Agent image built from `graybern/k8s-blinkstick` → `ghcr.io/graybern/k8s-blinkstick/agent`.
+
 ## Useful Commands
 
 ```bash
@@ -319,4 +335,10 @@ task secrets:create-all      # Create all required secrets (interactive)
 task secrets:create-twingate # Create Twingate API key secret
 task secrets:create-grafana  # Create Grafana admin credentials
 task secrets:create-ssh-ca   # Generate SSH CA key pair for Gateway
+task blinkstick:sweep        # Green chase left-to-right (1 hour)
+task blinkstick:solid        # Solid green on all nodes (1 hour)
+task blinkstick:pulse        # Slow green pulse on all nodes (1 hour)
+task blinkstick:off          # Turn off all BlinkSticks + cleanup pods
 ```
+
+BlinkStick tasks accept `COLOR=red` and `DURATION=600` (seconds) as overrides.

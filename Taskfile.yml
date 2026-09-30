@@ -108,3 +108,32 @@ tasks:
       - task: secrets:create-twingate
       - task: secrets:create-grafana
       - task: secrets:create-ssh-ca
+
+  blinkstick:sweep:
+    desc: "Green chase pattern left-to-right (1 hour)"
+    cmds:
+      - scripts/blinkstick.sh sweep
+    env:
+      COLOR: '{{.COLOR | default "green"}}'
+      DURATION: '{{.DURATION | default "3600"}}'
+
+  blinkstick:solid:
+    desc: "Solid color on all nodes (1 hour)"
+    cmds:
+      - scripts/blinkstick.sh solid
+    env:
+      COLOR: '{{.COLOR | default "green"}}'
+      DURATION: '{{.DURATION | default "3600"}}'
+
+  blinkstick:pulse:
+    desc: "Slow pulse on all nodes (1 hour)"
+    cmds:
+      - scripts/blinkstick.sh pulse
+    env:
+      COLOR: '{{.COLOR | default "green"}}'
+      DURATION: '{{.DURATION | default "3600"}}'
+
+  blinkstick:off:
+    desc: "Turn off all BlinkSticks and clean up pods"
+    cmds:
+      - scripts/blinkstick.sh off
