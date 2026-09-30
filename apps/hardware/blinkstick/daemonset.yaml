@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: blinkstick-agent
+  namespace: blinkstick
+  labels:
+    app: blinkstick-agent
+    octolet/layer: hardware
+    octolet/component: blinkstick
+spec:
+  selector:
+    matchLabels:
+      app: blinkstick-agent
+  template:
+    metadata:
+      labels:
+        app: blinkstick-agent
+    spec:
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+      terminationGracePeriodSeconds: 5
+      containers:
+        - name: agent
+          image: ghcr.io/graybern/k8s-blinkstick/agent:latest
+          envFrom:
+            - configMapRef:
+                name: blinkstick-agent-config
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: usb
+              mountPath: /dev/bus/usb
+          livenessProbe:
+            exec:
+              command: ["python3", "-c", "import os; os._exit(0 if os.path.exists('/tmp/healthy') else 1)"]
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          lifecycle:
+            preStop:
+              exec:
+                command: ["python3", "-c", "from agent.driver import shutdown; shutdown()"]
+      volumes:
+        - name: usb
+          hostPath:
+            path: /dev/bus/usb
+            type: Directory
