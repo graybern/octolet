@@ -18,8 +18,7 @@ spec:
     spec:
       tolerations:
         - operator: Exists
-          effect: NoSchedule
-      terminationGracePeriodSeconds: 5
+      terminationGracePeriodSeconds: 10
       containers:
         - name: agent
           image: ghcr.io/graybern/k8s-blinkstick/agent:latest
@@ -36,11 +35,6 @@ spec:
           volumeMounts:
             - name: usb
               mountPath: /dev/bus/usb
-          livenessProbe:
-            exec:
-              command: ["python3", "-c", "import os; os._exit(0 if os.path.exists('/tmp/healthy') else 1)"]
-            initialDelaySeconds: 10
-            periodSeconds: 15
           resources:
             requests:
               cpu: 20m
@@ -48,10 +42,6 @@ spec:
             limits:
               cpu: 100m
               memory: 64Mi
-          lifecycle:
-            preStop:
-              exec:
-                command: ["python3", "-c", "from agent.driver import shutdown; shutdown()"]
       volumes:
         - name: usb
           hostPath:
