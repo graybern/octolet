@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blinkstick-agent-config
+  namespace: blinkstick
+data:
+  MQTT_BROKER: "mosquitto.blinkstick.svc.cluster.local"
+  MQTT_PORT: "1883"
+  DEVICE_RETRY_INTERVAL: "30"
+  HEARTBEAT_INTERVAL: "30"

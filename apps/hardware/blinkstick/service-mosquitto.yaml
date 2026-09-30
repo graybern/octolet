@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto
+  namespace: blinkstick
+  labels:
+    app: mosquitto
+spec:
+  type: ClusterIP
+  ports:
+    - port: 1883
+      targetPort: 1883
+      protocol: TCP
+  selector:
+    app: mosquitto
