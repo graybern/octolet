@@ -50,7 +50,7 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-09-22)
+## Current State (2026-09-30)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
@@ -58,6 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
+- **BlinkStick**: Agent DaemonSet (5 pods, `blinkstick` ns) + Mosquitto MQTT broker. Controls BlinkStick Nano LEDs on 4 nodes via MQTT. App code in `graybern/k8s-blinkstick` repo, images at `ghcr.io/graybern/k8s-blinkstick/agent`. Ad-hoc control via `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
