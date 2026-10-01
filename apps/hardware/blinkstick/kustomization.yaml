@@ -5,8 +5,17 @@ namespace: blinkstick
 
 resources:
   - namespace.yaml
+  - serviceaccount.yaml
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
+  - role.yaml
+  - rolebinding.yaml
   - configmap-mosquitto.yaml
   - configmap-agent.yaml
+  - configmap-controller.yaml
   - deployment-mosquitto.yaml
+  - deployment-controller.yaml
   - service-mosquitto.yaml
+  - service-controller.yaml
+  - ingress.yaml
   - daemonset.yaml

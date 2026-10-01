@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: blinkstick-controller
+  namespace: blinkstick
+  labels:
+    app: blinkstick-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: blinkstick-controller
+subjects:
+  - kind: ServiceAccount
+    name: blinkstick-controller
+    namespace: blinkstick

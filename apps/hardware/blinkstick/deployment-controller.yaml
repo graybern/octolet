@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blinkstick-controller
+  namespace: blinkstick
+  labels:
+    app: blinkstick-controller
+    octolet/layer: hardware
+    octolet/component: blinkstick
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blinkstick-controller
+  template:
+    metadata:
+      labels:
+        app: blinkstick-controller
+    spec:
+      serviceAccountName: blinkstick-controller
+      containers:
+        - name: controller
+          image: ghcr.io/graybern/k8s-blinkstick/controller:latest
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: blinkstick-controller-config
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 30m
+              memory: 64Mi
+            limits:
+              cpu: 150m
+              memory: 128Mi

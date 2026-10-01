@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: blinkstick-controller
+  namespace: blinkstick
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: "BlinkStick"
+    gethomepage.dev/group: "Hardware"
+    gethomepage.dev/icon: "mdi-led-on"
+    gethomepage.dev/description: "LED orchestration controller"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - blinkstick.octolet.int
+  rules:
+    - host: blinkstick.octolet.int
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: blinkstick-controller
+                port:
+                  number: 8000
