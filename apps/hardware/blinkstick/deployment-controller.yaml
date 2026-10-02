@@ -27,17 +27,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: blinkstick-controller-config
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 8000
-            initialDelaySeconds: 10
-            periodSeconds: 15
           readinessProbe:
             httpGet:
               path: /readyz
               port: 8000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10
           resources:
             requests:
