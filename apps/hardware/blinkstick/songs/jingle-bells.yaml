@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: song-jingle-bells
+  namespace: blinkstick
+  labels:
+    blinkstick.octolet.int/type: song
+    blinkstick.octolet.int/source: git
+data:
+  beat-sheet.yaml: |
+    apiVersion: blinkstick.octolet.int/v1
+    kind: BeatSheet
+    metadata:
+      name: jingle-bells
+      title: "Jingle Bells"
+      author: grady
+    timing:
+      bpm: 120
+      time_signature: "4/4"
+      loop: false
+      default_transition: solid
+    on_end: status
+    palette:
+      R: "#FF0000"
+      G: "#00FF00"
+      B: "#0000FF"
+      W: "#FFFFFF"
+      _: "#000000"
+    node_order:
+      - octolet-control-2
+      - octolet-control-3
+      - octolet-worker-1
+      - octolet-worker-2
+    sections:
+      chorus:
+        - "RRGG"
+        - "GGRR"
+        - "RGBW"
+    beats:
+      - "GGGG"
+      - "GGGG"
+      - {section: "chorus"}
+      - {repeat: "RRRR", count: 4}
+      - "BBBB"
+      - "WWWW"
+      - {repeat_section: "chorus", count: 2}
+      - "____"
