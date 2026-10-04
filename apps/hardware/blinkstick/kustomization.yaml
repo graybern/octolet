@@ -19,4 +19,5 @@ resources:
   - service-controller.yaml
   - ingress.yaml
   - daemonset.yaml
+  - access.yaml
   - songs/jingle-bells.yaml

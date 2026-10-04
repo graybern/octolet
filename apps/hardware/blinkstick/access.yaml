@@ -1,0 +1,12 @@
+apiVersion: twingate.com/v1beta
+kind: TwingateResourceAccess
+metadata:
+  name: blinkstick-access
+  namespace: blinkstick
+spec:
+  resourceRef:
+    name: blinkstick-controller
+    namespace: blinkstick
+  principalExternalRef:
+    type: group
+    name: Admins

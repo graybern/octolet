@@ -5,10 +5,14 @@ metadata:
   namespace: blinkstick
   labels:
     app: blinkstick-controller
+  annotations:
+    resource.twingate.com: "true"
+    resource.twingate.com/name: "Hardware · BlinkStick"
+    resource.twingate.com/alias: "blinkstick.octolet.int"
 spec:
   type: ClusterIP
   ports:
-    - port: 8000
+    - port: 80
       targetPort: 8000
       protocol: TCP
   selector:
