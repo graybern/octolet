@@ -50,7 +50,7 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-10-03)
+## Current State (2026-10-04)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
@@ -58,7 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
-- **BlinkStick**: Full orchestration system in `blinkstick` ns. Agent DaemonSet (5 pods, play_sequence/time_check support) + Controller (status mode, music mode, 5 built-in presets, web dashboard with themes, WebSocket live updates) + Mosquitto MQTT broker. Web UI at `blinkstick.octolet.int` with dashboard, music library, mode config, direct control. Beat sheets stored as labeled ConfigMaps (git-managed + runtime uploads). App code in `graybern/k8s-blinkstick`, images at `ghcr.io/graybern/k8s-blinkstick/{agent,controller}`. Ad-hoc control via `task blinkstick:sweep/solid/pulse/off`.
+- **BlinkStick**: Full orchestration system in `blinkstick` ns. Agent DaemonSet (5 pods) + Controller + Mosquitto. Web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) with dashboard (alert banners, clock sync, activity log), visual beat sheet editor, music library, mode config, direct control, settings (MQTT inspector, event history). Status mode (Prometheus health), music mode (NTP-synced playback), 5 presets, Prometheus metrics. App code in `graybern/k8s-blinkstick`, images at `ghcr.io/graybern/k8s-blinkstick/{agent,controller}`. Ad-hoc control via `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
