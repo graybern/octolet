@@ -58,7 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
-- **BlinkStick**: Full orchestration system in `blinkstick` ns. Agent DaemonSet (5 pods) + Controller + Mosquitto. Web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) with dashboard (alert banners, clock sync, activity log), visual beat sheet editor, music library, mode config, direct control, settings (MQTT inspector, event history). Status mode (Prometheus health), music mode (NTP-synced playback), 5 presets, Prometheus metrics. App code in `graybern/k8s-blinkstick`, images at `ghcr.io/graybern/k8s-blinkstick/{agent,controller}`. Ad-hoc control via `task blinkstick:sweep/solid/pulse/off`.
+- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) — Dashboard (LED viz, mode switching, direct control, presets, activity log), Music (5 presets, song library, visual beat sheet editor), Settings (MQTT inspector, event history, clock sync). WebSocket live updates. Status mode (Prometheus health), music mode (NTP-synced timetable playback). 5 themes. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
