@@ -5,7 +5,7 @@ metadata:
   namespace: blinkstick
 spec:
   resourceRef:
-    name: blinkstick-controller
+    name: blinkstick-controller-resource
     namespace: blinkstick
   principalExternalRef:
     type: group
