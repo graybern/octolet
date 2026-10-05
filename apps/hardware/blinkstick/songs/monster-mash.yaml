@@ -1,0 +1,364 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: song-monster-mash
+  namespace: blinkstick
+  labels:
+    blinkstick.octolet.int/type: song
+    blinkstick.octolet.int/source: git
+data:
+  beat-sheet.yaml: |
+    apiVersion: blinkstick.octolet.int/v1
+    kind: BeatSheet
+    metadata:
+      name: monster-mash
+      title: "Monster Mash"
+      author: grady
+    timing:
+      bpm: 138
+      time_signature: "4/4"
+      loop: true
+      default_transition: solid
+    on_end: status
+    palette:
+      O: "#FF8800"
+      P: "#8800FF"
+      G: "#00FF44"
+      _: "#000000"
+    node_order:
+      - octolet-control-2
+      - octolet-control-3
+      - octolet-worker-1
+      - octolet-worker-2
+    sections:
+      mash_hit:
+        - "GGGG"
+        - "GGGG"
+      rest:
+        - "PPPP"
+        - "PPPP"
+      dark:
+        - "____"
+        - "____"
+      groove:
+        - "OPOP"
+        - "POPO"
+        - "OPOP"
+        - "POPO"
+    beats:
+      # ===== INTRO =====
+      - {section: "dark"}
+      - "O___"
+      - "_O__"
+      - "__O_"
+      - "___O"
+      - {section: "dark"}
+      - {section: "groove"}
+      # ===== VERSE 1 =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      # ===== CHORUS =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - {section: "rest"}
+      - {section: "groove"}
+      # ===== VERSE 2 =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      # ===== CHORUS REPEAT =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - {section: "rest"}
+      # ===== VERSE 3 =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      # ===== CHORUS REPEAT 2 =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - {section: "rest"}
+      - {section: "groove"}
+      # ===== BRIDGE =====
+      - {section: "dark"}
+      - {section: "dark"}
+      - {section: "groove"}
+      - {section: "groove"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - {colors: "GGGG", hold: 2}
+      - "PPPP"
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - "POPP"
+      - {colors: "GGGG", hold: 2}
+      - {section: "rest"}
+      # ===== FINAL CHORUS =====
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      - "PPPO"
+      - "PPOP"
+      - "POPP"
+      - {section: "mash_hit"}
+      - "OPPP"
+      - "POPP"
+      - "PPOP"
+      - "PPPO"
+      - "OPPP"
+      - {section: "mash_hit"}
+      # Big spooky finish
+      - {section: "groove"}
+      - {section: "groove"}
+      - "OGOG"
+      - "GOGO"
+      - "OGOG"
+      - "GOGO"
+      - {colors: "GGGG", hold: 3}
+      - {section: "dark"}
+      - "G___"
+      - {section: "dark"}
+      - {section: "rest"}

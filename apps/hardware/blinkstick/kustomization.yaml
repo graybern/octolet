@@ -21,3 +21,4 @@ resources:
   - daemonset.yaml
   - access.yaml
   - songs/jingle-bells.yaml
+  - songs/monster-mash.yaml
