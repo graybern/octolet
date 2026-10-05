@@ -17,14 +17,12 @@ data:
     timing:
       bpm: 120
       time_signature: "4/4"
-      loop: false
+      loop: true
       default_transition: solid
     on_end: status
     palette:
       R: "#FF0000"
       G: "#00FF00"
-      B: "#0000FF"
-      W: "#FFFFFF"
       _: "#000000"
     node_order:
       - octolet-control-2
@@ -32,16 +30,125 @@ data:
       - octolet-worker-1
       - octolet-worker-2
     sections:
-      chorus:
-        - "RRGG"
-        - "GGRR"
-        - "RGBW"
+      jingle_bells:
+        - "RGGG"
+        - "GRGG"
+        - "GGRG"
+        - "GGGR"
+      rest2:
+        - "GGGG"
+        - "GGGG"
+      crescendo:
+        - "RRRR"
+        - "RRRR"
+      verse_sweep:
+        - "RGGR"
+        - "GRRG"
     beats:
+      # ===== CHORUS =====
+      - {section: "jingle_bells"}
+      - {section: "jingle_bells"}
+      - "RGGG"
+      - "GRGG"
+      - "RGRG"
+      - "GRGR"
+      - {section: "crescendo"}
+      - {section: "rest2"}
+      - "GGGR"
+      - "GGRG"
+      - "GRGG"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - "RGGG"
+      - "GRGG"
+      - "RGRG"
+      - "GRGR"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - {colors: "RRRR", hold: 2}
+      - {section: "rest2"}
+      # ===== CHORUS REPEAT =====
+      - {section: "jingle_bells"}
+      - {section: "jingle_bells"}
+      - "RGGG"
+      - "GRGG"
+      - "RGRG"
+      - "GRGR"
+      - {section: "crescendo"}
+      - {section: "rest2"}
+      - "GGGR"
+      - "GGRG"
+      - "GRGG"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - "RGGG"
+      - "GRGG"
+      - "RGRG"
+      - "GRGR"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "RRRR"
+      - "RRRR"
+      - {section: "rest2"}
+      # ===== VERSE =====
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - {colors: "RRRR", hold: 2}
+      - "GGGR"
+      - "GGRG"
+      - "GRGG"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
       - "GGGG"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - {colors: "RRRR", hold: 2}
+      - "GGGR"
+      - "GGRG"
+      - "RGRG"
+      - "GRGR"
+      - {section: "crescendo"}
+      - {section: "rest2"}
+      - {section: "rest2"}
+      - {section: "verse_sweep"}
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - {colors: "RRRR", hold: 2}
+      - "GGGR"
+      - "GGRG"
+      - "GRGG"
+      - "RGGG"
+      - {colors: "RRRR", hold: 2}
       - "GGGG"
-      - {section: "chorus"}
-      - {repeat: "RRRR", count: 4}
-      - "BBBB"
-      - "WWWW"
-      - {repeat_section: "chorus", count: 2}
-      - "____"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - "RGGG"
+      - "GRGG"
+      - "GGRG"
+      - "GGGR"
+      - "RGGG"
+      - "RGRG"
+      - "GRGR"
+      - "RGRG"
+      - "GRGR"
+      - {colors: "RRRR", hold: 3}
+      - "RGRG"
+      - "GRGR"
+      - "RGRG"
+      - "GRGR"
+      - {section: "rest2"}
