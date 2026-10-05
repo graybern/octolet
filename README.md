@@ -36,7 +36,7 @@ apps/
 ├── networking/        Twingate Operator + Gateway + Connectors
 ├── platform/          Homepage dashboard
 ├── twindemo/          httpbin, sshd, Grafana JWT/Basic, ArgoCD proxy
-└── hardware/          (Phase 2: BlinkStick USB LEDs)
+└── hardware/          BlinkStick LED orchestration (agent DaemonSet + controller + MQTT)
 
 common/
 ├── dashboards/        Grafana dashboard JSON (auto-imported via sidecar)
@@ -79,4 +79,4 @@ task status
 - [CLAUDE.md](CLAUDE.md) — Architecture decisions, naming conventions, label taxonomy, patterns
 - [docs/architecture.md](docs/architecture.md) — Full architecture documentation with data flow diagrams
 - [docs/handoff-prompt.md](docs/handoff-prompt.md) — Session handoff for new Claude Code sessions
-- [TODO.md](TODO.md) — Phase 2 items (ESO, Pyroscope, Grafana Kiosk, BlinkStick, Longhorn)
+- [TODO.md](TODO.md) — Future items (ESO, Pyroscope, Grafana Kiosk, Longhorn, BlinkStick Phase 4b overlays)

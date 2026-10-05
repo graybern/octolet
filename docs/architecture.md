@@ -29,6 +29,7 @@ Twingate Cloud ◄──── Twingate Client (user device)
 │  ├── prometheus.octolet.int → Prometheus :9090   │
 │  ├── alertmanager.octolet.int → AlertManager     │
 │  ├── homepage.octolet.int   → Homepage :3000     │
+│  ├── blinkstick.octolet.int → BlinkStick :8000  │
 │  └── argocd.octolet.int    → ArgoCD :443        │
 │                                                  │
 │  Twingate Gateway (L7 proxy, *.int aliases)      │
@@ -335,6 +336,30 @@ SSH — Gateway ↔ sshd:
   Purpose: authenticate SSH sessions (both directions)
 
 These are completely independent. Rotating one doesn't affect the other.
+```
+
+## BlinkStick LED Orchestration
+
+**Namespace:** `blinkstick` | **Web UI:** `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick)
+
+4 BlinkStick Nano USB LEDs across 4 of 5 nodes (control-1 has no BlinkStick). Each Nano has 2 independently addressable RGB LEDs = 8 LEDs total. Physical order L→R: control-2, control-3, worker-1, worker-2.
+
+**Components:**
+- **Agent DaemonSet** (5 pods) — USB device driver, MQTT subscriber, play_sequence/time_check support
+- **Controller Deployment** (1 pod) — FastAPI web app, mode engine, Prometheus health polling, MQTT publisher
+- **Mosquitto Deployment** (1 pod) — MQTT broker for agent↔controller communication
+
+**App code** lives in a separate repo: `graybern/k8s-blinkstick`. Images at `ghcr.io/graybern/k8s-blinkstick/{agent,controller}`.
+
+**Modes:** Status (Prometheus health → green pulse), Music (NTP-synced timetable playback), Direct (LED popover control), 6 built-in presets (Status/Chase/Alternate/Rainbow/Flash/Police).
+
+**Pattern Editor:** Visual step sequencer grid with drag-to-paint, fill row/column, undo, move/duplicate/delete beats, sections, Code YAML tab. Beat sheets stored as labeled ConfigMaps (git-managed via ArgoCD + runtime uploads from web UI).
+
+**Data flow:**
+```
+Controller → MQTT cmd/all or cmd/{node} → Agent → BlinkStick USB (pyusb/libusb)
+Controller → WS /ws/live (5Hz during playback) → Browser dashboard
+Prometheus → Controller (health polling every 15s) → Status mode colors
 ```
 
 ## Storage Strategy
