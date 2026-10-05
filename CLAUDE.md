@@ -50,7 +50,7 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-10-06)
+## Current State (2026-10-07)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
@@ -58,7 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
-- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick). Dashboard: clickable LED circles with inline popover (per-LED color pickers + effect + Apply), mode switching, node table with Prometheus health, presets (Chase/Rainbow/Flash/Police), activity log. Music: quick patterns, song library, visual beat sheet editor + code tab. Settings: controller info, MQTT inspector, event history, clock sync. WebSocket live, 5 themes, WCAG-accessible. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
+- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick). Dashboard: clickable LED circles with inline popover, auto clock sync, Built-in Patterns (Status/Chase/Alternate/Rainbow/Flash/Police/All Off), node table with all 5 nodes' metrics, activity log. Patterns: Pattern Library + Pattern Editor (visual grid with fill-row/drag-paint/undo/move/clear + Code YAML tab). Settings: MQTT inspector, event history, clock sync. Live LED viz during playback (5Hz WS), 5 themes, WCAG-accessible. Full Jingle Bells beat sheet deployed. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
