@@ -50,7 +50,7 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-10-05)
+## Current State (2026-10-06)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
@@ -58,7 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
-- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick). Dashboard: LED viz with dimmed off-state, mode switching, direct control, 4 presets, activity log. Music: 5 quick patterns, song library, visual beat sheet editor with step sequencer + code tab. Settings: controller info, MQTT inspector with pause, event history with filters, clock sync. WebSocket live updates, targeted DOM updates (no flicker), 5 themes, WCAG-accessible. Playwright audited: 94/106 UI + 18/18 API. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
+- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick). Dashboard: clickable LED circles with inline popover (per-LED color pickers + effect + Apply), mode switching, node table with Prometheus health, presets (Chase/Rainbow/Flash/Police), activity log. Music: quick patterns, song library, visual beat sheet editor + code tab. Settings: controller info, MQTT inspector, event history, clock sync. WebSocket live, 5 themes, WCAG-accessible. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
