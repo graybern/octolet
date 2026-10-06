@@ -66,6 +66,40 @@ alloy:
         stage.label_drop {
           values = ["filename"]
         }
+
+        // Twingate connector structured log extraction
+        // Connector logs: "ANALYTICS {json}" with logAnalytics: true
+        // Only low-cardinality fields promoted as labels to prevent index explosion
+        // High-cardinality fields (user.email, resource.address, rx/tx) stay in log line — query with | json
+        stage.match {
+          selector = "{namespace=\"twingate\", container=\"connector\"}"
+
+          stage.regex {
+            expression = "^ANALYTICS (?P<analytics_json>.*)$"
+          }
+
+          stage.json {
+            source      = "analytics_json"
+            expressions = {
+              event_type          = "event_type",
+              connector_name      = "connector.name",
+              connection_protocol = "connection.protocol",
+            }
+          }
+
+          stage.labels {
+            values = {
+              event_type          = "",
+              connector_name      = "",
+              connection_protocol = "",
+            }
+          }
+
+          stage.label_drop {
+            values = ["analytics_json"]
+          }
+        }
+
         forward_to = [loki.write.default.receiver]
       }
 
