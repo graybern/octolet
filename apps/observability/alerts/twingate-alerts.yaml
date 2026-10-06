@@ -11,7 +11,7 @@ spec:
       rules:
         - alert: TwingateConnectorDown
           expr: |
-            count(kube_pod_status_phase{namespace="twingate", phase="Running"} * on(pod) kube_pod_labels{label_app_kubernetes_io_name="twingate-connector"}) < 2
+            sum(kube_deployment_status_replicas_available{namespace="twingate", deployment=~"twop-connector-.*"}) < 2
           for: 5m
           labels:
             severity: critical
@@ -21,13 +21,13 @@ spec:
 
         - alert: TwingateOperatorDown
           expr: |
-            absent(kube_pod_status_phase{namespace="twingate", phase="Running"} * on(pod) kube_pod_labels{label_app_kubernetes_io_name="twingate-operator"})
+            kube_deployment_status_replicas_available{namespace="twingate", deployment="twop-twingate-operator"} == 0
           for: 5m
           labels:
             severity: critical
           annotations:
             summary: "Twingate Operator is not running"
-            description: "No Twingate Operator pod found in the twingate namespace."
+            description: "No Twingate Operator replicas available in the twingate namespace."
 
     - name: twingate.recording-rules
       rules:
