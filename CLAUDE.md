@@ -50,7 +50,7 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-10-05)
+## Current State (2026-10-06)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
@@ -58,7 +58,7 @@
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
 - **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules) + BlinkStick (ControllerDown, AgentOffline, HighTickLatency)
-- **BlinkStick**: Full orchestration in `blinkstick` ns. 10 modes (status, direct, music, knight-rider, rainbow-wave, breathing, temperature, network, morse, countdown). 5 event overlays (Twingate connection flash via Loki, ArgoCD deploy wave, AlertManager escalation strobe, pod lifecycle, webhook) with priority-based LED 1 split. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) with overlay badge. ServiceMonitor scraping `/api/v1/metrics` (jobLabel: app). PrometheusRule with 3 alerts. Grafana dashboard in Hardware folder. Jingle Bells + Monster Mash beat sheets. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
+- **BlinkStick**: Full orchestration in `blinkstick` ns. 10 modes (status, direct, music, knight-rider, rainbow-wave, breathing, temperature, network, morse, countdown). 5 event overlays (Twingate connection flash via Loki, ArgoCD deploy wave, AlertManager escalation strobe, pod lifecycle, webhook) — all disabled by default (opt-in via UI toggles). Priority-based LED 1 split. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) with overlay toggles, status config checkboxes, overlay badge. ServiceMonitor scraping `/api/v1/metrics` (jobLabel: app). PrometheusRule with 3 alerts. Grafana dashboard in Hardware folder. Jingle Bells + Monster Mash beat sheets. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
