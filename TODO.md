@@ -17,15 +17,13 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
   - Monolithic mode, Grafana Alloy scrapes profiles via `prometheus.exporter.pyroscope`
   - Chart: `grafana/pyroscope` — ARM64 confirmed
 
-- [ ] **Alloy Twingate log pipeline** — Structured field extraction from Connector/Gateway logs
-  - `loki.process "twingate"` with `stage.json`, `stage.labels`, `stage.metrics`
-  - Promote fields: connector name, event type, connection duration, bytes transferred
-  - Optional: derive Prometheus metrics from log lines
+- [x] **Alloy Twingate log pipeline** — ✅ `stage.match` in `loki.process` extracts `event_type`, `connector_name`, `connection_protocol` as Loki labels. High-cardinality fields stay in log line for `| json` query-time extraction.
 
-- [ ] **Custom dashboards** — `common/dashboards/`
-  - Cluster overview (node CPU/mem/disk, pod health) for touchscreen
-  - Twingate Connector L4 dashboard (LogQL-derived: connections/sec, bytes, unique clients)
-  - Touchscreen summary (simplified view for kiosk rotation)
+- [x] **Custom dashboards** — ✅ Deployed via `apps/observability/dashboards/` (ArgoCD-managed)
+  - Cluster Overview (9 panels: node status, CPU/mem/disk, pod health, alerts, temperature, top pods)
+  - Touchscreen Summary (11 panels: node tiles, gauges, Twingate connections, BlinkStick status)
+  - Twingate Connector L4 (10 panels: connections/sec, protocol, resources, traffic, duration, bytes)
+  - BlinkStick Controller (10 panels: nodes, ticks, overlays, MQTT, clock skew)
 
 - [ ] **AlertManager routing** — Slack/Discord receivers for critical alerts
   - Requires: Slack incoming webhook URL + channel (create at api.slack.com → Incoming Webhooks)
@@ -57,17 +55,14 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
 
 ## Hardware
 
-- [ ] **BlinkStick USB LED indicators** — `apps/hardware/blinkstick/`
-  - Containerized BlinkStick controller as DaemonSet on each node
-  - USB device access via `securityContext.privileged` + `hostPath` for `/dev/bus/usb`
-  - Queries Prometheus API for node/cluster health
-  - State-to-color mapping (ConfigMap):
-    - Solid green: node healthy, all pods running
-    - Pulsing blue: node under load (CPU/mem >70%)
-    - Solid yellow: warning alerts firing on this node
-    - Pulsing red: critical alerts or node NotReady
-    - Rainbow/chase: cluster-wide event (deploy in progress)
-  - Custom container: Python + `blinkstick` library + Prometheus client
+- [x] **BlinkStick USB LED indicators** — ✅ Complete through Phase 4b
+  - Agent DaemonSet + Mosquitto MQTT broker + Controller deployment
+  - 7 background/foreground modes: status, direct, music, knight-rider, rainbow-wave, breathing, temperature
+  - 3 event overlays: Twingate connection flash (Loki), ArgoCD deploy wave, AlertManager escalation
+  - Split LED: LED 0 = background, LED 1 = overlay with priority queue
+  - Web UI with overlay badge, mode selector, Settings event history
+  - ServiceMonitor (`/api/v1/metrics`), PrometheusRule (3 alerts), Grafana dashboard
+  - App code: `graybern/k8s-blinkstick` | K8s manifests: `apps/hardware/blinkstick/`
 
 ## Networking
 
@@ -88,10 +83,8 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
 
 ## Reliability
 
-- [ ] **Health probes audit** — Add startup/readiness/liveness probes to all custom deployments
-  - Helm charts (Prometheus, Grafana, Loki, Tempo, Alloy) already have probes built in
-  - Custom manifests need probes added:
-    - `apps/twindemo/sshd/deployment.yaml` — exec probe: `ssh-keygen -l -f /etc/ssh/twingate_ca.pub`
-    - `apps/platform/homepage/deployment.yaml` — HTTP probe: GET `:3000/api/healthcheck`
-  - Document probe convention in CLAUDE.md: all custom deployments must include at least readiness + liveness
-  - Consider startup probes for slow-starting containers (sshd installs packages at startup)
+- [x] **Health probes audit** — ✅ All custom deployments now have probes
+  - sshd: startup + readiness + liveness (tcpSocket :2222)
+  - homepage: startup + readiness + liveness (tcpSocket :3000)
+  - blinkstick-controller: startup + readiness + liveness (httpGet /healthz, /readyz)
+  - blinkstick-agent: skipped — DaemonSet restart + `BlinkStickAgentOffline` alert covers this

@@ -50,15 +50,15 @@
 
 13. **Separate demo vs production pods.** **Why:** Demo pods (sshd, httpbin) are disposable — no persistent storage, restart clean. Production/agent pods need PVCs for data persistence. Keeping them separate prevents demo experiments from affecting real work. **Trade-off:** More pods on Pi hardware.
 
-## Current State (2026-10-07)
+## Current State (2026-10-05)
 
 ### Deployed and Working
 - **LGTMP stack**: Prometheus, Grafana (JWT + password auth, cookie_secure=false for HTTP), Loki (monolithic, logs flowing with all K8s labels), Tempo (monolithic), Alloy (DaemonSet, 5 nodes, local.file_match pipeline), AlertManager
 - **Twingate**: Operator v2.0.2 (ArgoCD-managed), Gateway (L7: K8s API, SSH, WebApp, TLS cert frozen via ignoreDifferences), 2 Connectors
 - **Demo apps**: sshd (Alpine, cert auth via SSH Gateway, host cert signing), httpbin (WebApp JWT), Grafana Basic (L4 tunnel), Wetty (web SSH, cert auth)
 - **Platform**: Homepage (Ingress annotation auto-discovery + manual entries), Headlamp (HA, 3 replicas, auto-auth)
-- **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules)
-- **BlinkStick**: Full orchestration in `blinkstick` ns. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick). Dashboard: clickable LED circles with inline popover, auto clock sync, Built-in Patterns (Status/Chase/Alternate/Rainbow/Flash/Police/All Off), node table with all 5 nodes' metrics, activity log. Patterns: Pattern Library + Pattern Editor (visual grid with fill-row/drag-paint/undo/move/clear + Code YAML tab). Settings: MQTT inspector, event history, clock sync. Live LED viz during playback (5Hz WS), 5 themes, WCAG-accessible. Full Jingle Bells beat sheet deployed. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
+- **Alerts**: Cluster (NodeNotReady, CrashLoopBackOff, PVCNearlyFull) + Twingate (ConnectorDown, OperatorDown, Gateway recording rules) + BlinkStick (ControllerDown, AgentOffline, HighTickLatency)
+- **BlinkStick**: Full orchestration in `blinkstick` ns. 7 modes (status, direct, music, knight-rider, rainbow-wave, breathing, temperature). 3 event overlays (Twingate connection flash via Loki, ArgoCD deploy wave, AlertManager escalation strobe) with priority-based LED 1 split. 3-tab web UI at `blinkstick.octolet.int` (Twingate: Hardware · BlinkStick) with overlay badge. ServiceMonitor scraping `/api/v1/metrics` (jobLabel: app). PrometheusRule with 3 alerts. Grafana dashboard in Hardware folder. Jingle Bells + Monster Mash beat sheets. App code in `graybern/k8s-blinkstick`. Ad-hoc: `task blinkstick:sweep/solid/pulse/off`.
 - **Architecture diagram**: `docs/architecture.html` (interactive HTML)
 - **control-1 tainted**: `dedicated=touchscreen:NoSchedule` — only DaemonSet pods run on the touchscreen node
 
@@ -98,7 +98,7 @@ Best overview dashboard: "Kubernetes / Compute Resources / Cluster"
 
 ```
 Alloy DaemonSet (per node)
-├── Pod logs → Loki
+├── Pod logs → loki.process (CRI parse + Twingate stage.match) → Loki
 ├── OTLP traces → Tempo
 └── Self-metrics → Prometheus (remote-write)
 
@@ -106,6 +106,8 @@ Prometheus (scrapes via ServiceMonitors)
 ├── node-exporter (host metrics)
 ├── kube-state-metrics (K8s object metrics)
 ├── Gateway :9090 (Twingate L7/L4/API/Auth metrics)
+├── Connectors :9999 (traffic bytes, uptime)
+├── BlinkStick controller :8000/api/v1/metrics (nodes, ticks, overlays, MQTT)
 └── Any ServiceMonitor-annotated workload
 
 Tempo metrics-generator → Prometheus (remote-write, RED metrics from traces)
@@ -114,12 +116,18 @@ Grafana datasources (cross-linked):
 ├── Prometheus → exemplar traceID links to Tempo
 ├── Loki → derived field traceID links to Tempo
 └── Tempo → traces-to-logs links to Loki, service map from Prometheus
+
+Grafana dashboards (sidecar auto-discovery, label grafana_dashboard=1):
+├── Hardware/BlinkStick Controller (nodes, ticks, overlays, MQTT, clock skew)
+├── Twingate/Connector L4 (connections, traffic, duration, resources)
+├── Cluster/Overview (node status, CPU/mem/disk, top pods, alerts)
+└── Cluster/Touchscreen Summary (kiosk-optimized, node tiles, Twingate connections)
 ```
 
 ### Twingate Monitoring
 
 - **Gateway**: 28 Prometheus metrics on port 9090 (HTTP, TCP, K8s API, Auth, Sessions). Built-in ServiceMonitor, Grafana dashboard, and PrometheusRules — enabled in values.
-- **Connectors**: No native metrics endpoint. Structured L4 connection logs via `logAnalytics: true` → collected by Alloy → query with LogQL in Grafana. Log-derived metrics via `rate()`/`count_over_time()`.
+- **Connectors**: Prometheus metrics on port 9999 (`TWINGATE_METRICS_PORT` via `containerExtra`): `twingate_inbound/outbound_bytes_total{transport}`, `twingate_connector_uptime_seconds`. Headless Service + ServiceMonitor for scraping. Structured L4 connection logs via `logAnalytics: true` → Alloy extracts `event_type`, `connector_name`, `connection_protocol` as Loki labels via `stage.match` pipeline. High-cardinality fields (user, resource, bytes, duration) query with `| json` at query time. Grafana dashboard in Twingate folder (10 panels: LogQL + Prometheus).
 - **Operator**: Kopf-based Python operator. Set `logFormat: "json"` for structured logs.
 
 ## Label Taxonomy
