@@ -28,6 +28,11 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
   - Touchscreen summary (simplified view for kiosk rotation)
 
 - [ ] **AlertManager routing** — Slack/Discord receivers for critical alerts
+  - Requires: Slack incoming webhook URL + channel (create at api.slack.com → Incoming Webhooks)
+  - Create manual K8s Secret with webhook URL on cluster
+  - Update `alertmanager.config` in `apps/observability/prometheus/values.yaml`
+  - Route `severity=critical` to dedicated receiver, `severity=warning` to general
+  - Plan ready in `.claude/plans/` Phase 10
 
 - [ ] **Alloy consolidation** — Evaluate replacing node-exporter with Alloy's built-in `prometheus.exporter.unix`
   - Reduces to one DaemonSet per node (from two)

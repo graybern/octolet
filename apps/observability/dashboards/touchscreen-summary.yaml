@@ -1,0 +1,224 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: touchscreen-summary-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cluster"
+data:
+  touchscreen-summary.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "title": "control-1",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 5, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "kube_node_status_condition{node=\"octolet-control-1\", condition=\"Ready\", status=\"true\"}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "OK", "color": "green" } } }],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+        },
+        {
+          "title": "control-2",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 5, "x": 5, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "kube_node_status_condition{node=\"octolet-control-2\", condition=\"Ready\", status=\"true\"}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "OK", "color": "green" } } }],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+        },
+        {
+          "title": "control-3",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 5, "x": 10, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "kube_node_status_condition{node=\"octolet-control-3\", condition=\"Ready\", status=\"true\"}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "OK", "color": "green" } } }],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+        },
+        {
+          "title": "worker-1",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 5, "x": 15, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "kube_node_status_condition{node=\"octolet-worker-1\", condition=\"Ready\", status=\"true\"}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "OK", "color": "green" } } }],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+        },
+        {
+          "title": "worker-2",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "kube_node_status_condition{node=\"octolet-worker-2\", condition=\"Ready\", status=\"true\"}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [{ "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "OK", "color": "green" } } }],
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center" }
+        },
+        {
+          "title": "Cluster CPU",
+          "type": "gauge",
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "100 * (1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))", "legendFormat": "", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "min": 0, "max": 100,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 60 }, { "color": "red", "value": 85 }] }
+            }
+          }
+        },
+        {
+          "title": "Cluster Memory",
+          "type": "gauge",
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "100 * (1 - sum(node_memory_MemAvailable_bytes) / sum(node_memory_MemTotal_bytes))", "legendFormat": "", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "min": 0, "max": 100,
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 60 }, { "color": "red", "value": 85 }] }
+            }
+          }
+        },
+        {
+          "title": "Alerts / BlinkStick",
+          "type": "stat",
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "count(ALERTS{alertstate=\"firing\"}) or vector(0)", "legendFormat": "Alerts Firing", "refId": "A" },
+            { "expr": "blinkstick_nodes_online", "legendFormat": "LEDs Online", "refId": "B" }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Alerts Firing" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "LEDs Online" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+            ]
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name" }
+        },
+        {
+          "title": "Twingate Connections (1h)",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 12, "x": 0, "y": 12 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"}[1h]))",
+              "legendFormat": "Connections",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "cyan", "value": null }] }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "area", "textMode": "value_and_name" }
+        },
+        {
+          "title": "BlinkStick",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 12, "x": 12, "y": 12 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "blinkstick_nodes_online", "legendFormat": "Agents Online", "refId": "A" },
+            { "expr": "blinkstick_nodes_present", "legendFormat": "Devices", "refId": "B" },
+            { "expr": "sum(rate(blinkstick_overlay_triggers_total[1h])) * 3600 or vector(0)", "legendFormat": "Overlays/hr", "refId": "C" }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Agents Online" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "Devices" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "Overlays/hr" }, "properties": [{ "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] }
+            ]
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name" }
+        },
+        {
+          "title": "Cluster CPU Over Time",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))", "legendFormat": "{{ instance }}", "refId": "A" }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent", "min": 0, "max": 100,
+              "custom": { "lineWidth": 2, "fillOpacity": 10, "spanNulls": true }
+            }
+          }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["cluster", "touchscreen", "kiosk"],
+      "templating": {
+        "list": [
+          {
+            "name": "DS_PROMETHEUS",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": { "selected": true, "text": "Prometheus", "value": "prometheus" }
+          },
+          {
+            "name": "DS_LOKI",
+            "type": "datasource",
+            "query": "loki",
+            "current": { "selected": true, "text": "Loki", "value": "loki" }
+          }
+        ]
+      },
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": { "refresh_intervals": ["10s", "30s", "1m"] },
+      "timezone": "browser",
+      "title": "Touchscreen Summary",
+      "uid": "touchscreen-summary",
+      "version": 1
+    }

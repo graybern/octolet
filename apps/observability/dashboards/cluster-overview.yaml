@@ -1,0 +1,265 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-overview-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cluster"
+data:
+  cluster-overview.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "title": "Node Status",
+          "type": "table",
+          "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "kube_node_status_condition{condition=\"Ready\", status=\"true\"}",
+              "legendFormat": "{{ node }}",
+              "refId": "ready",
+              "format": "table",
+              "instant": true
+            }
+          ],
+          "transformations": [
+            { "id": "organize", "options": { "excludeByName": { "Time": true, "__name__": true, "condition": true, "status": true, "job": true, "instance": true, "service": true }, "renameByName": { "node": "Node", "Value": "Ready" } } }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Ready" }, "properties": [{ "id": "mappings", "value": [{ "type": "value", "options": { "0": { "text": "NOT READY", "color": "red" }, "1": { "text": "READY", "color": "green" } } }] }, { "id": "custom.displayMode", "value": "color-background" }] }
+            ]
+          },
+          "options": { "showHeader": true }
+        },
+        {
+          "title": "CPU per Node",
+          "type": "bargauge",
+          "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "100 * (1 - avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])))",
+              "legendFormat": "{{ instance }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0, "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 70 },
+                  { "color": "red", "value": 90 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "title": "Memory per Node",
+          "type": "bargauge",
+          "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+              "legendFormat": "{{ instance }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0, "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 70 },
+                  { "color": "red", "value": 90 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "title": "Disk per Node",
+          "type": "bargauge",
+          "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "100 * (1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"})",
+              "legendFormat": "{{ instance }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0, "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 70 },
+                  { "color": "red", "value": 85 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "title": "Pod Status",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 8, "x": 0, "y": 14 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "count(kube_pod_status_phase{phase=\"Running\"} == 1)", "legendFormat": "Running", "refId": "A" },
+            { "expr": "count(kube_pod_status_phase{phase=\"Pending\"} == 1) or vector(0)", "legendFormat": "Pending", "refId": "B" },
+            { "expr": "count(kube_pod_status_phase{phase=\"Failed\"} == 1) or vector(0)", "legendFormat": "Failed", "refId": "C" }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Running" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "Pending" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "Failed" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+            ]
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name" }
+        },
+        {
+          "title": "Alerts Firing",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 8, "x": 8, "y": 14 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            { "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"}) or vector(0)", "legendFormat": "Critical", "refId": "A" },
+            { "expr": "count(ALERTS{alertstate=\"firing\", severity=\"warning\"}) or vector(0)", "legendFormat": "Warning", "refId": "B" }
+          ],
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Critical" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "Warning" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }
+            ]
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name" }
+        },
+        {
+          "title": "Node Temperature",
+          "type": "bargauge",
+          "gridPos": { "h": 4, "w": 8, "x": 16, "y": 14 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "node_thermal_zone_temp{type=\"cpu-thermal\"}",
+              "legendFormat": "{{ instance }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "min": 30, "max": 85,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "blue", "value": null },
+                  { "color": "green", "value": 45 },
+                  { "color": "yellow", "value": 65 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "title": "Top 5 CPU Pods",
+          "type": "bargauge",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "topk(5, sum by (namespace, pod) (rate(container_cpu_usage_seconds_total{container!=\"\"}[5m]))) * 1000",
+              "legendFormat": "{{ namespace }}/{{ pod }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "millicores",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 200 },
+                  { "color": "red", "value": 500 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        },
+        {
+          "title": "Top 5 Memory Pods",
+          "type": "bargauge",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 18 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "topk(5, sum by (namespace, pod) (container_memory_working_set_bytes{container!=\"\"}))",
+              "legendFormat": "{{ namespace }}/{{ pod }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "decbytes",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 268435456 },
+                  { "color": "red", "value": 536870912 }
+                ]
+              }
+            }
+          },
+          "options": { "orientation": "horizontal", "displayMode": "gradient", "showUnfilled": true }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["cluster", "overview"],
+      "templating": {
+        "list": [
+          {
+            "name": "DS_PROMETHEUS",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": { "selected": true, "text": "Prometheus", "value": "prometheus" }
+          }
+        ]
+      },
+      "time": { "from": "now-1h", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Cluster Overview",
+      "uid": "cluster-overview",
+      "version": 1
+    }
