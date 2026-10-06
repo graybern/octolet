@@ -55,10 +55,10 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
 
 ## Hardware
 
-- [x] **BlinkStick USB LED indicators** — ✅ Complete through Phase 4b
+- [x] **BlinkStick USB LED indicators** — ✅ Complete (Phases 1–4b + 13–17)
   - Agent DaemonSet + Mosquitto MQTT broker + Controller deployment
-  - 7 background/foreground modes: status, direct, music, knight-rider, rainbow-wave, breathing, temperature
-  - 3 event overlays: Twingate connection flash (Loki), ArgoCD deploy wave, AlertManager escalation
+  - 10 modes: status, direct, music, knight-rider, rainbow-wave, breathing, temperature, network, morse, countdown
+  - 5 event overlays: Twingate connection flash (Loki), ArgoCD deploy wave, AlertManager escalation, pod lifecycle, webhook
   - Split LED: LED 0 = background, LED 1 = overlay with priority queue
   - Web UI with overlay badge, mode selector, Settings event history
   - ServiceMonitor (`/api/v1/metrics`), PrometheusRule (3 alerts), Grafana dashboard
