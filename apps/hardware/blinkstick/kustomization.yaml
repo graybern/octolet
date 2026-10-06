@@ -20,6 +20,7 @@ resources:
   - ingress.yaml
   - daemonset.yaml
   - servicemonitor.yaml
+  - grafana-dashboard.yaml
   - access.yaml
   - songs/jingle-bells.yaml
   - songs/monster-mash.yaml
