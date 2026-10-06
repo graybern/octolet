@@ -1,0 +1,262 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: twingate-connector-dashboard
+  namespace: twingate
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Twingate"
+data:
+  twingate-connector-l4.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "links": [],
+      "panels": [
+        {
+          "title": "Connections / sec",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"}[$__interval]))",
+              "legendFormat": "established",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(count_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"closed_connection\"}[$__interval]))",
+              "legendFormat": "closed",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "cps",
+              "custom": { "lineWidth": 2, "fillOpacity": 15, "spanNulls": true }
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "established" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "closed" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] }
+            ]
+          }
+        },
+        {
+          "title": "Connections by Protocol",
+          "type": "piechart",
+          "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "sum by (connection_protocol) (count_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"}[$__range]))",
+              "legendFormat": "{{ connection_protocol }}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "title": "Connections by Connector",
+          "type": "piechart",
+          "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "sum by (connector_name) (count_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"}[$__range]))",
+              "legendFormat": "{{ connector_name }}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "title": "Top Resources by Connection Count",
+          "type": "table",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "{namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"} | json | line_format \"{{ .resource_address }}\"",
+              "refId": "A"
+            }
+          ],
+          "transformations": [
+            { "id": "extractFields", "options": { "source": "Line" } },
+            { "id": "groupBy", "options": { "fields": { "Line": { "aggregations": ["count"], "operation": "groupby" } } } },
+            { "id": "sortBy", "options": { "fields": [{ "name": "Line (count)", "desc": true }] } }
+          ],
+          "options": { "showHeader": true },
+          "fieldConfig": {
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Line" }, "properties": [{ "id": "displayName", "value": "Resource" }] },
+              { "matcher": { "id": "byName", "options": "Line (count)" }, "properties": [{ "id": "displayName", "value": "Connections" }] }
+            ]
+          }
+        },
+        {
+          "title": "Recent Connections",
+          "type": "table",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "{namespace=\"twingate\", container=\"connector\", event_type=\"established_connection\"} | json | line_format \"{{.user_email}} → {{.resource_address}} ({{.connection_protocol}})\"",
+              "refId": "A"
+            }
+          ],
+          "options": { "showHeader": true },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "Line" }, "properties": [{ "id": "displayName", "value": "Connection" }] }
+            ]
+          }
+        },
+        {
+          "title": "Connector Traffic — Inbound",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "rate(twingate_inbound_bytes_total[5m])",
+              "legendFormat": "{{ transport }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "custom": { "lineWidth": 2, "fillOpacity": 20, "stacking": { "mode": "normal" } }
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "direct" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "relay" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+            ]
+          }
+        },
+        {
+          "title": "Connector Traffic — Outbound",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "rate(twingate_outbound_bytes_total[5m])",
+              "legendFormat": "{{ transport }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "Bps",
+              "custom": { "lineWidth": 2, "fillOpacity": 20, "stacking": { "mode": "normal" } }
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "direct" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "relay" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] }
+            ]
+          }
+        },
+        {
+          "title": "Connector Uptime",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 12, "x": 0, "y": 24 },
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "targets": [
+            {
+              "expr": "twingate_connector_uptime_seconds",
+              "legendFormat": "{{ instance }}",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "yellow", "value": 3600 },
+                  { "color": "green", "value": 86400 }
+                ]
+              }
+            }
+          },
+          "options": { "colorMode": "background", "graphMode": "none", "textMode": "value_and_name" }
+        },
+        {
+          "title": "Connection Duration Distribution",
+          "type": "histogram",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "{namespace=\"twingate\", container=\"connector\", event_type=\"closed_connection\"} | json | unwrap connection_duration | __error__=\"\"",
+              "legendFormat": "duration",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "custom": { "fillOpacity": 80 }
+            }
+          },
+          "options": { "bucketSize": 1000, "combine": true }
+        },
+        {
+          "title": "Bytes per Connection",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 32 },
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "targets": [
+            {
+              "expr": "avg_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"closed_connection\"} | json | unwrap connection_rx | __error__=\"\" [$__interval])",
+              "legendFormat": "avg RX bytes",
+              "refId": "A"
+            },
+            {
+              "expr": "avg_over_time({namespace=\"twingate\", container=\"connector\", event_type=\"closed_connection\"} | json | unwrap connection_tx | __error__=\"\" [$__interval])",
+              "legendFormat": "avg TX bytes",
+              "refId": "B"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "decbytes",
+              "custom": { "lineWidth": 2, "fillOpacity": 15, "spanNulls": true }
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "avg RX bytes" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "avg TX bytes" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+            ]
+          }
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["twingate", "networking"],
+      "templating": {
+        "list": [
+          {
+            "name": "DS_LOKI",
+            "type": "datasource",
+            "query": "loki",
+            "current": { "selected": true, "text": "Loki", "value": "loki" }
+          },
+          {
+            "name": "DS_PROMETHEUS",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": { "selected": true, "text": "Prometheus", "value": "prometheus" }
+          }
+        ]
+      },
+      "time": { "from": "now-6h", "to": "now" },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Twingate Connector L4",
+      "uid": "twingate-connector-l4",
+      "version": 1
+    }
