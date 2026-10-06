@@ -1,3 +1,7 @@
+kubeScheduler:
+  enabled: false
+kubeControllerManager:
+  enabled: false
 kubeProxy:
   enabled: false
 
