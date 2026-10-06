@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: twingate-connector
+  namespace: twingate
+  labels:
+    octolet/component: twingate-connector
+spec:
+  jobLabel: octolet/component
+  selector:
+    matchLabels:
+      octolet/component: twingate-connector
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

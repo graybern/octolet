@@ -3,5 +3,7 @@ kind: Kustomization
 resources:
   - application.yaml
   - connectors.yaml
+  - connector-service.yaml
+  - connector-servicemonitor.yaml
   - access.yaml
   - clusterrolebinding.yaml

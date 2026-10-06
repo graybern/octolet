@@ -11,6 +11,16 @@ spec:
   image:
     repository: twingate/connector
     tag: latest
+  podLabels:
+    octolet/component: twingate-connector
+  containerExtra:
+    env:
+      - name: TWINGATE_METRICS_PORT
+        value: "9999"
+    ports:
+      - containerPort: 9999
+        name: metrics
+        protocol: TCP
 ---
 apiVersion: twingate.com/v1beta
 kind: TwingateConnector
@@ -25,3 +35,13 @@ spec:
   image:
     repository: twingate/connector
     tag: latest
+  podLabels:
+    octolet/component: twingate-connector
+  containerExtra:
+    env:
+      - name: TWINGATE_METRICS_PORT
+        value: "9999"
+    ports:
+      - containerPort: 9999
+        name: metrics
+        protocol: TCP
