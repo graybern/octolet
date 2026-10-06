@@ -12,5 +12,5 @@ spec:
       app: blinkstick-controller
   endpoints:
     - port: http
-      path: /metrics
+      path: /api/v1/metrics
       interval: 30s
