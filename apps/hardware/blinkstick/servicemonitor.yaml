@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: blinkstick-controller
+  namespace: blinkstick
+  labels:
+    app: blinkstick-controller
+spec:
+  jobLabel: app
+  selector:
+    matchLabels:
+      app: blinkstick-controller
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s

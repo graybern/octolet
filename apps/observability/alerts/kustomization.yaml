@@ -4,3 +4,4 @@ resources:
   - cluster-alerts.yaml
   - twingate-alerts.yaml
   - twingate-resources.yaml
+  - blinkstick-alerts.yaml

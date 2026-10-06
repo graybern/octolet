@@ -6,6 +6,8 @@ metadata:
 data:
   MQTT_BROKER: "mosquitto.blinkstick.svc.cluster.local"
   PROMETHEUS_URL: "http://prometheus-stack-kube-prom-prometheus.monitoring:9090"
+  LOKI_URL: "http://loki.monitoring:3100"
+  ALERTMANAGER_URL: "http://prometheus-stack-kube-prom-alertmanager.monitoring:9093"
   DEFAULT_MODE: "status"
   STATUS_POLL_INTERVAL: "15"
   LOG_LEVEL: "INFO"

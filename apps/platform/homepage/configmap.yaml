@@ -22,6 +22,9 @@ data:
       Infrastructure:
         style: row
         columns: 2
+      Hardware:
+        style: row
+        columns: 1
       Twingate Demo:
         style: row
         columns: 4

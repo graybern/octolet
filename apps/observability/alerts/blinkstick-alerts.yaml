@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: blinkstick-alerts
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+    - name: blinkstick.rules
+      rules:
+        - alert: BlinkStickControllerDown
+          expr: up{job="blinkstick-controller"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "BlinkStick controller is down"
+            description: "The BlinkStick controller has been unreachable for 5 minutes."
+
+        - alert: BlinkStickAgentOffline
+          expr: blinkstick_nodes_online < blinkstick_nodes_present
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "BlinkStick agent(s) offline"
+            description: "Some agents with BlinkStick devices are not responding."
+
+        - alert: BlinkStickHighTickLatency
+          expr: histogram_quantile(0.99, rate(blinkstick_engine_tick_duration_seconds_bucket[5m])) > 0.5
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "BlinkStick engine tick latency is high"
+            description: "P99 engine tick duration exceeds 500ms."

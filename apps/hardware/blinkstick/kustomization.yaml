@@ -19,6 +19,7 @@ resources:
   - service-controller.yaml
   - ingress.yaml
   - daemonset.yaml
+  - servicemonitor.yaml
   - access.yaml
   - songs/jingle-bells.yaml
   - songs/monster-mash.yaml
