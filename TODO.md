@@ -30,7 +30,12 @@ Tracked items for future implementation. Each becomes an `apps/` directory when 
   - Create manual K8s Secret with webhook URL on cluster
   - Update `alertmanager.config` in `apps/observability/prometheus/values.yaml`
   - Route `severity=critical` to dedicated receiver, `severity=warning` to general
-  - Plan ready in `.claude/plans/` Phase 10
+  - Routes ALL cluster alerts (not just BlinkStick) — user has their own Slack workspace and will create an incoming webhook app
+  - Needed from user: webhook URL, channel name, single vs separate critical/warning channels
+
+- [ ] **Fix `alerts` ArgoCD app OutOfSync** — `TwingateResourceAccess` `prometheus-access` / `alertmanager-access` fail with "resourceRef is immutable", blocking the whole app
+  - `twingate-alerts.yaml` fix (deployment-replicas expressions) was applied manually via `kubectl apply` on 2026-10-06
+  - Fix: delete + let ArgoCD recreate those two resources, or add `ignoreDifferences` on `/spec/resourceRef`
 
 - [ ] **Alloy consolidation** — Evaluate replacing node-exporter with Alloy's built-in `prometheus.exporter.unix`
   - Reduces to one DaemonSet per node (from two)

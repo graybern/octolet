@@ -299,10 +299,20 @@ Current manual secrets:
 
 Loki and Tempo are accessed in-cluster only (via Grafana datasources and Alloy). No external ingress needed.
 
-### Common Directory
+### Dashboards and Alerts Location
 
-- `common/dashboards/` — Grafana dashboard JSON files deployed as ConfigMaps with `grafana_dashboard: "1"` label (sidecar auto-imports)
-- `common/alerts/` — PrometheusRule CRDs for cluster and Twingate alerting
+The ApplicationSet only scans `apps/*/*`, so anything under `common/` is **not deployed**. Put deployable resources under `apps/`:
+- Cross-cutting dashboards → `apps/observability/dashboards/` (ConfigMaps with `grafana_dashboard: "1"`, `grafana_folder` annotation)
+- Component dashboards → alongside the component (e.g. `apps/hardware/blinkstick/grafana-dashboard.yaml`, `apps/networking/twingate/connector-dashboard.yaml`)
+- PrometheusRules → `apps/observability/alerts/` (namespace `monitoring`, label `release: prometheus-stack`)
+
+Alert rules should use `kube_deployment_status_replicas_available`, not `kube_pod_labels` joins — `kube_pod_labels` is empty for operator-managed pods and causes `absent()` false positives.
+
+### Known Issues
+
+- **`alerts` ArgoCD app stuck OutOfSync**: `TwingateResourceAccess` resources (`prometheus-access`, `alertmanager-access`) fail sync with "resourceRef is immutable". This blocks the whole app, so `twingate-alerts.yaml` changes were applied manually with `kubectl apply`. Fix: delete and recreate those two resources, or add `ignoreDifferences` on `/spec/resourceRef`.
+- **K3s false positives**: `kubeScheduler`, `kubeControllerManager`, and `kubeProxy` monitoring are disabled in `apps/observability/prometheus/values.yaml` because K3s embeds them.
+- **git push from Claude Code**: fails with `No user exists for uid 501` inside the sandbox. Push from a normal terminal.
 
 ## Patterns from homelab-ops
 
@@ -331,8 +341,10 @@ Lives in a separate repo: `graybern/k8s-blinkstick`. This repo holds only the K8
 ### Ad-hoc Control (`scripts/blinkstick.sh`)
 Quick LED control via privileged pods + nsenter into the host's `/opt/venvs/tools/bin/blinkstick` CLI. No container image needed — uses the host's battle-tested Python venv directly.
 
-### K8s Agent (in progress)
-DaemonSet agent + Mosquitto MQTT broker at `apps/hardware/blinkstick/`. Agent image built from `graybern/k8s-blinkstick` → `ghcr.io/graybern/k8s-blinkstick/agent`.
+### K8s Deployment (complete)
+DaemonSet agent + Mosquitto MQTT broker + controller at `apps/hardware/blinkstick/`. Images built by CI in `graybern/k8s-blinkstick` → `ghcr.io/graybern/k8s-blinkstick/{agent,controller}:latest`. After a k8s-blinkstick push, wait for CI then `kubectl rollout restart deploy/blinkstick-controller -n blinkstick` to pull the new `:latest`.
+
+Overlays are opt-in (all default off). Toggle at runtime in the web UI, or set `OVERLAY_*_ENABLED=true` in `configmap-controller.yaml`. Pod lifecycle overlay is limited to `POD_LIFECYCLE_NAMESPACES` (default `blinkstick,default,twingate`).
 
 ## Useful Commands
 
